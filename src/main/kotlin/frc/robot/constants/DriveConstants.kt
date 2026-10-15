@@ -44,7 +44,7 @@ val kSparkMaxConfig: SparkMaxConfig
 val kLeftConfig: SparkMaxConfig
     get() {
         val config = kSparkMaxConfig
-        config.inverted(true)
+        config.inverted(false)
 
         return config
     }
@@ -52,7 +52,7 @@ val kLeftConfig: SparkMaxConfig
 val kRightConfig: SparkMaxConfig
     get() {
         val config = kSparkMaxConfig
-        config.inverted(false)
+        config.inverted(true)
 
         return config
     }

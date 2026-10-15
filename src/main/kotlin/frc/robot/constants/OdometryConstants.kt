@@ -3,6 +3,5 @@ package frc.robot.constants
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.measure.Distance
 
-const val kBufferCapacity = Float.SIZE_BYTES * 6
-const val kStartingFrameSignature: Int = 0x7E4A7A52
-const val kEndingFrameSignature: Int = 0x1B997D5C
+const val kFrameSignature: UByte = 0xAAu
+const val kEscapeByte: UByte = 0xBBu

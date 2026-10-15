@@ -1,34 +1,34 @@
 package frc.robot.constants
 
+import com.ctre.phoenix6.configs.Slot0Configs
+import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.signals.NeutralModeValue
 import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.units.Units
+import edu.wpi.first.units.Units.Millimeters
+import edu.wpi.first.units.Units.RotationsPerSecond
 import edu.wpi.first.units.measure.Distance
 import kotlin.math.PI
 
-const val kMotorCANID = 9
+const val kIntakeCANID = 22
 
-// meters per sec
-val kIntakeVelocity = 1.0
+// rotatons/s
+val kIntakeingVelocity = RotationsPerSecond.of(3.0)!!
 
-private val kDiameter = Distance.ofBaseUnits(0.0, Units.Millimeter)
-
-
-val kIntakeMotorConfig: SparkMaxConfig
+val kIntakeerConfig: TalonFXConfiguration
     get() {
-        val config = SparkMaxConfig()
+        val config = TalonFXConfiguration()
 
-        config.smartCurrentLimit(45)
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast
 
-        config.closedLoop
-            .pid(0.45, 0.0, 0.12)
-            .maxOutput(1.0)
+        val gainConfig = Slot0Configs()
 
-        config.idleMode(SparkBaseConfig.IdleMode.kCoast)
+        gainConfig.kP = 0.4
+        gainConfig.kI = 0.0
+        gainConfig.kD = 0.1
 
-        config.encoder
-            .velocityConversionFactor(PI)
-            .positionConversionFactor(PI)
+        config.withSlot0(gainConfig)
 
         return config
     }
