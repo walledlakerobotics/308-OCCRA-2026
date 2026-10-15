@@ -1,134 +1,117 @@
 package frc.robot.subsystems.drivetrain
 
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.SerialPort
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
-import frc.robot.constants.kBufferCapacity
-import frc.robot.constants.kStartingFrameSignature
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.concurrent.locks.ReentrantLock
+import frc.robot.constants.kEscapeByte
+import frc.robot.constants.kFrameSignature
+import kotlinx.io.Buffer
+import kotlinx.io.Source
+import kotlinx.io.readFloatLe
+import kotlinx.io.readUByte
+import kotlinx.io.readUIntLe
+import kotlinx.io.writeUByte
+import java.util.concurrent.atomic.AtomicBoolean
 
-
-class DriveOdometry : AutoCloseable {
+@Logged
+class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
 
 
     // TODO: Need to make a sum check
 
     // port serial instance
     private var serialPort =
-        SerialPort(115200, SerialPort.Port.kUSB, 8, SerialPort.Parity.kNone, SerialPort.StopBits.kOne)
+        SerialPort(115200, port)
 
-    private var byteBuffer: ByteBuffer = ByteBuffer.allocate(kBufferCapacity) // need to get the size of struct 
+    @Volatile
+    private var odometryData = OdometryData(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    
+    private val isRunning = AtomicBoolean(false)
 
-    private var odometryData: OdometryData = OdometryData(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
-    private val odometryDataLock: ReentrantLock = ReentrantLock()
+
+    private val buffer = Buffer()
+    private val dataSequence = sequence {
+        while (true) {
+            // Find the start of the frame
+            @Suppress("ControlFlowWithEmptyBody")
+            while (buffer.readUByte() != kFrameSignature) {}
+
+            val lengthTag = buffer.escape(4).readUIntLe()
+            val payload = buffer.escape(lengthTag.toLong())
+
+            odometryData = OdometryData(
+                payload.readFloatLe(),
+                payload.readFloatLe(),
+                payload.readFloatLe(),
+                payload.readFloatLe(),
+                payload.readFloatLe(),
+                payload.readFloatLe()
+            )
+        }
+    }.iterator()
 
     // updates in seprate thread in different intervals
     private val notifier = Notifier {
+        if (!isRunning.compareAndSet(false, true)) {
+            return@Notifier
+        }
+        
+        try {
+            buffer.write(serialPort.read(serialPort.bytesReceived))
+        } catch (_: Exception) {
+            serialPort.close()
 
-        synchronized(byteBuffer) {
-            try {
-                // getting data
-                val bytes = serialPort.read(kBufferCapacity)
-                byteBuffer.clear()
-                byteBuffer.put(bytes)
+            serialPort = SerialPort(115200, port)
 
-            } catch (e: Exception) {
-
-                // reassigns the port, and prevents memory leak
-                serialPort.close()
-
-                serialPort =
-                    SerialPort(115200, SerialPort.Port.kUSB, 8, SerialPort.Parity.kNone, SerialPort.StopBits.kOne)
+            isRunning.set(false)
+            return@Notifier
+        }
+            
+        try {
+            dataSequence.next()
+        } finally {
+            isRunning.set(false)
+        }
+    }
+    
+    context(scope: SequenceScope<Unit>)
+    private suspend fun Source.escape(count: Long): Buffer {
+        val escapedBuffer = Buffer()
+        
+        while (escapedBuffer.size < count) {
+            readUByte().let { byte ->
+                if (byte == kEscapeByte) {
+                    val nextByte = readUByte()
+                    escapedBuffer.writeUByte(nextByte xor 0x20u)
+                    
+                    continue
+                }
+                
+                escapedBuffer.writeUByte(byte)
             }
         }
-
-        synchronized(odometryDataLock) {
-            var signature = byteBuffer.getInt()
-
-            // offsets the buffer until it finds the starting point. 
-            while (signature != kStartingFrameSignature && byteBuffer.remaining() >= Int.SIZE_BYTES) {
-                byteBuffer.position(byteBuffer.position() + 1)
-                signature = byteBuffer.getInt()
-            }
-
-            // gets data
-            val x = byteBuffer.getFloat()
-            val y = byteBuffer.getFloat()
-            val r = byteBuffer.getFloat()
-
-            val vx = byteBuffer.getFloat()
-            val vy = byteBuffer.getFloat()
-            val vr = byteBuffer.getFloat()
-
-            odometryData = OdometryData(x, y, r, vx, vy, vr)
-        }
-
-
+        
+        return escapedBuffer
+    }
+    
+    context(scope: SequenceScope<Unit>)
+    private suspend fun Source.readUByte(): UByte {
+        while (exhausted()) scope.yield(Unit)
+        return readUByte()
     }
 
     val position: Pose2d
-        get() {
-            var pose: Pose2d
+        get() = odometryData.position
 
-            synchronized(odometryDataLock) {
-                pose = Pose2d(
-                    Translation2d(odometryData.positionX.toDouble(), odometryData.positionY.toDouble()),
-                    Rotation2d(odometryData.rotationHeading.toDouble())
-                )
-            }
-
-            return pose
-        }
-
-    val velocity: Pose2d
-        get() {
-            var pose: Pose2d
-
-            synchronized(odometryDataLock) {
-                pose = Pose2d(
-                    Translation2d(odometryData.velocityX.toDouble(), odometryData.velocityY.toDouble()),
-                    Rotation2d(odometryData.velocityRotationHeading.toDouble())
-                )
-            }
-
-            return pose
-        }
+    val velocity: ChassisSpeeds
+        get() = odometryData.velocity
 
     init {
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
         notifier.startPeriodic(0.01)
-
-        val tab = Shuffleboard.getTab("Odometry")
-
-        tab.addDouble("X-Position") {
-            position.x
-        }
-
-        tab.addDouble("Y-Position") {
-            position.y
-        }
-
-        tab.addDouble("Rotation-Deg") {
-            position.rotation.degrees
-        }
-
-        tab.addDouble("X-Velocity") {
-            velocity.x
-        }
-
-        tab.addDouble("Y-Velocity") {
-            velocity.y
-        }
-
-        tab.addDouble("Rotation-Velocity-Deg") {
-            velocity.rotation.degrees
-        }
-
     }
 
     override fun close() {
@@ -137,18 +120,47 @@ class DriveOdometry : AutoCloseable {
     }
 }
 
-private data class OdometryData(
-    val positionX: Float,
-    val positionY: Float,
-    val rotationHeading: Float,
-    val velocityX: Float,
-    val velocityY: Float,
-    val velocityRotationHeading: Float
+data class OdometryData(
+    val positionX: Double,
+    val positionY: Double,
+    val positionHeading: Double,
+    val velocityX: Double,
+    val velocityY: Double,
+    val velocityHeading: Double
 ) {
-    fun sumData(): Float {
-        return positionX + positionY + rotationHeading +
-                velocityX + velocityY + velocityRotationHeading
-    }
+    val position: Pose2d
+        get() = Pose2d(
+            Translation2d(positionX, positionY),
+            Rotation2d.fromRadians(positionHeading)
+        )
+        
+    val velocity: ChassisSpeeds
+        get() = ChassisSpeeds(
+            velocityX,
+            velocityY,
+            velocityHeading
+        )
+        
+    val velocityFieldRelative: ChassisSpeeds
+        get() = ChassisSpeeds.fromRobotRelativeSpeeds(velocity, position.rotation)
+        
+    constructor(
+        positionX: Float,
+        positionY: Float,
+        positionHeading: Float,
+        velocityX: Float,
+        velocityY: Float,
+        velocityHeading: Float
+    ) : this(
+        positionX.toDouble(),
+        positionY.toDouble(),
+        positionHeading.toDouble(),
+        velocityX.toDouble(),
+        velocityY.toDouble(),
+        velocityHeading.toDouble()
+    )
+        
+    constructor() : this(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 }
 
 

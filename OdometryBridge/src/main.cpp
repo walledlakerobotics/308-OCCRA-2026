@@ -1,8 +1,6 @@
 #include <Arduino.h>
-#include <pico/mutex.h>
-#include <pico.h>
 #include <goBILDA_Pinpoint.h>
-#include <Serial.h>
+#include "utilities.hpp"
 
 // I want perfect memory management so it can send it fast.
 
@@ -12,25 +10,30 @@ mutex_t pinpoint_mtx = mutex();
 mutex_t writing_serial_mtx = mutex();
 mutex_t reading_serial_mtx = mutex();
 
-#pragma pack(push, 1)
 struct p_data
 {
-  const uint starting_signature = 0x7E4A7A52;
-
   float position_x = 0.0;
   float position_y = 0.0;
-  float rotation_heading = 0.0;
+  float position_heading = 0.0;
 
   float velocity_x = 0.0;
   float velocity_y = 0.0;
-  float velocity_rotation_heading = 0.0;
+  float velocity_heading = 0.0;
 
-  float sum_check = 0.0;
+  std::vector<uint8_t> to_bytes()
+  {
+    std::vector<uint8_t> bytes(sizeof(float) * 6);
 
-  const uint ending_signature = 0x1B997D5C;
+    push_to_buffer(bytes, position_x);
+    push_to_buffer(bytes, position_y);
+    push_to_buffer(bytes, position_heading);
+    push_to_buffer(bytes, velocity_x);
+    push_to_buffer(bytes, velocity_y);
+    push_to_buffer(bytes, velocity_heading);
+
+    return bytes;
+  }
 };
-
-#pragma pack(pop)
 
 void setup()
 {
@@ -70,37 +73,25 @@ void loop1()
 
   position_data.position_x = position.x;
   position_data.position_y = position.y;
-  position_data.rotation_heading = position.heading;
+  position_data.position_heading = position.heading;
 
   position_data.velocity_x = pinpoint.getVelocityX();
   position_data.velocity_y = pinpoint.getVelocityY();
-  position_data.velocity_rotation_heading = pinpoint.getVelocityHeading();
+  position_data.velocity_heading = pinpoint.getVelocityHeading();
 
   mutex_exit(&pinpoint_mtx);
 
-  position_data.sum_check = data_sum(&position_data);
-
   // converts data into a buffer of bytes.
 
-  size_t buffer_size = sizeof(position_data);
-  u_int8_t buffer[buffer_size];
-
-  memcpy(buffer, &position_data, buffer_size);
+  std::vector<uint8_t> buffer = position_data.to_bytes();
+  size_t buffer_size = buffer.size();
 
   mutex_enter_blocking(&writing_serial_mtx);
+
   // sends data and waits for it to complete.
-  Serial.write(buffer, buffer_size);
+  Serial.write(buffer.data(), buffer_size);
+
   mutex_exit(&writing_serial_mtx);
 
   sleep_ms(1);
-}
-
-float data_sum(p_data *data)
-{
-  return data->position_x +
-         data->position_y +
-         data->rotation_heading +
-         data->velocity_x +
-         data->velocity_y +
-         data->velocity_rotation_heading;
 }
