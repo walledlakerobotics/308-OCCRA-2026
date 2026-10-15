@@ -5,12 +5,14 @@ import com.revrobotics.ResetMode
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.constants.*
 
+@Logged
 class MecanumDrive : SubsystemBase() {
 
     private val frontLeftNeo = SparkMax(kFrontLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
@@ -55,33 +57,6 @@ class MecanumDrive : SubsystemBase() {
         }
     }
 
-//    /**
-//     *  Calculates each motors velocity vectors, and sets the set point for the output of the control loop.
-//     *
-//     * @param speeds the velocity vector that is measured in m/s or (Meters per Second).
-//     * */
-//    public fun drive(speeds: ChassisSpeeds) {
-//        // factors in the angle of the vector, and the rotation of the vector
-//        val rotationFactor = (kDistanceFromCenter.`in`(Units.Meter) * 0.5) * (speeds.omegaRadiansPerSecond + atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond))
-//
-//        val frontLeftVelocity = speeds.vxMetersPerSecond + speeds.vyMetersPerSecond - rotationFactor
-//        mFrontLeftNeo.closedLoopController.setSetpoint(frontLeftVelocity, SparkBase.ControlType.kVelocity)
-//
-//        val frontRightVelocity = speeds.vxMetersPerSecond + speeds.vyMetersPerSecond + rotationFactor
-//        mFrontRightNeo.closedLoopController.setSetpoint(frontRightVelocity, SparkBase.ControlType.kVelocity)
-//
-//        val backLeftVelocity = speeds.vxMetersPerSecond + speeds.vyMetersPerSecond + rotationFactor
-//        mBackLeftNeo.closedLoopController.setSetpoint(backLeftVelocity, SparkBase.ControlType.kVelocity)
-//
-//        val backRightVelocity = speeds.vxMetersPerSecond + speeds.vyMetersPerSecond - rotationFactor
-//        mBackRightNeo.closedLoopController.setSetpoint(backRightVelocity, SparkBase.ControlType.kVelocity)
-//    }
-
-    /**
-     *
-     * stops the drive
-     *
-     * */
     fun stop() {
         drive(ChassisSpeeds())
     }
