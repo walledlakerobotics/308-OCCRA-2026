@@ -1,5 +1,7 @@
 #include <vector>
 #include <cstdint>
+#include <cstring>
+#include <xxhash.h>
 
 const uint8_t frame_signature = 0xAA;
 const uint8_t escape_byte = 0xBB;
