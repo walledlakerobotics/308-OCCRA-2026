@@ -25,7 +25,7 @@ private val kIndexerMotorConfig: SparkBaseConfig
     }
     
 val kLeftIndexerMotorConfig: SparkBaseConfig
-    get() = kIndexerMotorConfig.inverted(true)
+    get() = kIndexerMotorConfig.inverted(false)
 
 val kRightIndexerMotorConfig: SparkBaseConfig
-    get() = kIndexerMotorConfig.inverted(true)
+    get() = kIndexerMotorConfig.inverted(false)
