@@ -56,17 +56,7 @@ void setup()
   mutex_init(&pinpoint_mtx);
 }
 
-// reading
 void loop()
-{
-  mutex_enter_blocking(&reading_serial_mtx);
-
-  mutex_exit(&reading_serial_mtx);
-
-  sleep_ms(1);
-}
-
-void loop1()
 {
   mutex_enter_blocking(&pinpoint_mtx);
   goBILDA::Pose2D position = pinpoint.getPosition();
@@ -84,7 +74,9 @@ void loop1()
 
   // converts data into a buffer of bytes.
 
-  std::vector<uint8_t> buffer = position_data.to_bytes();
+  std::vector<uint8_t> payload = position_data.to_bytes();
+
+  std::vector<uint8_t> buffer = create_frame(payload);
   size_t buffer_size = buffer.size();
 
   mutex_enter_blocking(&writing_serial_mtx);
@@ -94,5 +86,22 @@ void loop1()
 
   mutex_exit(&writing_serial_mtx);
 
-  sleep_ms(1);
+  delay(5);
 }
+
+// void setup1()
+// {
+//   delay(1000);
+// }
+
+// // reading
+// void loop1()
+// {
+//   // mutex_enter_blocking(&writing_serial_mtx);
+
+//   // Serial.println("Testing...");
+
+//   // mutex_exit(&writing_serial_mtx);
+
+//   // delay(1000);
+// }
