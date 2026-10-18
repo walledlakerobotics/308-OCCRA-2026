@@ -186,5 +186,8 @@ compile_commands.json
 # Eclipse generated file for annotation processors
 .factorypath
 
+# Kotlin
+.kotlin/
+
 OdometryBridge/.pio
 OdometryBridge/.vscode
