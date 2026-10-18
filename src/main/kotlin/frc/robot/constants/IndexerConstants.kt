@@ -9,7 +9,10 @@ import kotlin.math.PI
 const val kLeftIndexerCANID = 21
 const val kRightIndexerCANID = 23
 
-private val kIndexerMotorConfig: SparkMaxConfig
+const val kLeftSensorChannel = 1
+const val kRightSensorChannel = 0
+
+private val kIndexerMotorConfig: SparkBaseConfig
     get() {
         val config = SparkMaxConfig()
 
