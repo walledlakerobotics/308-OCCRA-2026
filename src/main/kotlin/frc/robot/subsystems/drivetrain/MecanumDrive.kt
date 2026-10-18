@@ -58,6 +58,11 @@ class MecanumDrive : SubsystemBase(), AutoCloseable {
         frontRightNeo.closedLoopController.setSetpoint(v.frontRightMetersPerSecond, SparkBase.ControlType.kVelocity)
         backRightNeo.closedLoopController.setSetpoint(v.rearRightMetersPerSecond, SparkBase.ControlType.kVelocity)
         backLeftNeo.closedLoopController.setSetpoint(v.rearLeftMetersPerSecond, SparkBase.ControlType.kVelocity)
+
+        SmartDashboard.putNumber("Drive/Goal/FrontLeft", v.frontLeftMetersPerSecond)
+        SmartDashboard.putNumber("Drive/Goal/FrontRight", v.frontRightMetersPerSecond)
+        SmartDashboard.putNumber("Drive/Goal/RearLeft", v.rearLeftMetersPerSecond)
+        SmartDashboard.putNumber("Drive/Goal/RearRight", v.rearRightMetersPerSecond)
     }
 
     fun drive(x: () -> Double, y: () -> Double, theta: () -> Double): Command {
