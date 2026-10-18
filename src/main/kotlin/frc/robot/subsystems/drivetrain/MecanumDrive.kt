@@ -5,11 +5,18 @@ import com.revrobotics.ResetMode
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
+import com.revrobotics.spark.config.SparkBaseConfig
+import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
+import edu.wpi.first.wpilibj.SerialPort
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
 import frc.robot.constants.*
 
 @Logged
@@ -69,9 +76,9 @@ class MecanumDrive : SubsystemBase(), AutoCloseable {
         return run {
             drive(
                 ChassisSpeeds(
-                    x() * kSpeedFactor,
-                    y() * kSpeedFactor,
-                    theta() * kSpeedFactor
+                    x() * kTranslationFactor,
+                    y() * kTranslationFactor,
+                    theta() * kRotationFactor
                 )
             )
         }
