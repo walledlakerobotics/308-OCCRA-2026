@@ -23,18 +23,39 @@ class RobotContainer {
     val intake = Intake()
     val indexer = Indexer()
     val shooter = Shooter()
-    
+
     init {
-        // config controller binds. 
+        // config controller binds
         drivetrain.defaultCommand = drivetrain.drive(
             { -MathUtil.applyDeadband(driverController.leftY, kDeadBandThreshold) },
             { -MathUtil.applyDeadband(driverController.leftX, kDeadBandThreshold) },
-            { MathUtil.applyDeadband(driverController.rightX, kDeadBandThreshold) }
+            { -MathUtil.applyDeadband(driverController.rightX, kDeadBandThreshold) }
         )
-        
+
         coDriverController.a().whileTrue(indexer.indexer.alongWith(intake.intake))
-        
+        // coDriverController.a().whileTrue(intake.intake)
+
         coDriverController.b().whileTrue(shooter.shoot())
+
+        coDriverController.leftBumper().whileTrue(shooter.sysIdForwardQuasistatic)
+        coDriverController.rightBumper().whileTrue(shooter.sysIdReverseQuasistatic)
+
+        coDriverController.leftTrigger().whileTrue(shooter.sysIdForwardDynamic)
+        coDriverController.rightTrigger().whileTrue(shooter.sysIdReverseDynamic)
+
+        driverController.leftBumper().whileTrue(
+            drivetrain.drive(
+                { 0.1 },
+                { 0.0 },
+                { 0.0 }
+            ))
+
+        driverController.rightBumper().whileTrue(
+            drivetrain.drive(
+                { 0.1 },
+                { 0.0 },
+                { 0.0 }
+            ))
     }
 
 
