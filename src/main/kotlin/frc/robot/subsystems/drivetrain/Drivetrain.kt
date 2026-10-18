@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
 import frc.robot.constants.*
 
 @Logged
-class MecanumDrive : SubsystemBase(), AutoCloseable {
+class Drivetrain : SubsystemBase(), AutoCloseable {
     private val frontLeftNeo = SparkMax(kFrontLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val frontRightNeo = SparkMax(kFrontRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backLeftNeo = SparkMax(kBackLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)

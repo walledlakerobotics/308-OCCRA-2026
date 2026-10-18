@@ -11,14 +11,14 @@ import frc.robot.constants.kDriverControllerPort
 import frc.robot.subsystems.Indexer
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.drivetrain.MecanumDrive
+import frc.robot.subsystems.drivetrain.Drivetrain
 
 @Logged
 class RobotContainer : AutoCloseable {
     val driverController = CommandXboxController(kDriverControllerPort)
     val coDriverController = CommandXboxController(kCoDriverControllerPort)
 
-    val drivetrain = MecanumDrive()
+    val drivetrain = Drivetrain()
     val intake = Intake()
     val indexer = Indexer()
     val shooter = Shooter()
