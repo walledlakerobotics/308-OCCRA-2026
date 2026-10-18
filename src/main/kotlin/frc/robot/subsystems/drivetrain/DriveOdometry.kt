@@ -22,6 +22,10 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
     private var serialPort =
         SerialPort(115200, port)
 
+    private val serialPortSim: com.fazecast.jSerialComm.SerialPort? = if (RobotBase.isSimulation()) {
+        com.fazecast.jSerialComm.SerialPort.getCommPort("COM13")
+    } else null
+
     @Volatile
     private var odometryData = OdometryData(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     
@@ -33,7 +37,8 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
         while (true) {
             // Find the start of the frame
             @Suppress("ControlFlowWithEmptyBody")
-            while (buffer.readUByte() != kFrameSignature) {}
+            while (buffer.readUByteYielding() != kFrameSignature) {
+            }
 
             val lengthTag = buffer.escape(4).readUIntLe()
             val payload = buffer.escape(lengthTag.toLong())
@@ -65,31 +70,62 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
         if (!isRunning.compareAndSet(false, true)) {
             return@Notifier
         }
-        
-        try {
-            buffer.write(serialPort.read(serialPort.bytesReceived))
-        } catch (_: Exception) {
-            serialPort.close()
 
-            serialPort = SerialPort(115200, port)
+        if (RobotBase.isReal()) {
+            try {
+                buffer.write(serialPort.read(serialPort.bytesReceived))
+            } catch (_: Exception) {
+                serialPort.close()
 
-            isRunning.set(false)
-            return@Notifier
+                serialPort = SerialPort(115200, port)
+
+                isRunning.set(false)
+                return@Notifier
+            }
+        } else {
+            serialPortSim?.let { simPort ->
+                try {
+                    val bytes = ByteArray(simPort.bytesAvailable())
+                    println(bytes.size)
+
+                    val bytesRead = simPort.readBytes(bytes, bytes.size)
+
+                    buffer.write(bytes)
+                } catch (_: Exception) {
+                    simPort.closePort()
+
+                    simPort.openPort()
+
+                    isRunning.set(false)
+                    return@Notifier
+                }
+            }
         }
-            
+
         try {
             dataSequence.next()
         } finally {
             isRunning.set(false)
         }
     }
-    
+        serialPortSim?.apply {
+            println("Using simulated serial port")
+            
+            baudRate = 115200
+            numDataBits = 8
+            parity = com.fazecast.jSerialComm.SerialPort.NO_PARITY
+            numStopBits = com.fazecast.jSerialComm.SerialPort.ONE_STOP_BIT
+
+            openPort()
+        }
+
+
     context(scope: SequenceScope<Unit>)
     private suspend fun Source.escape(count: Long): Buffer {
         val escapedBuffer = Buffer()
         
         while (escapedBuffer.size < count) {
-            readUByte().let { byte ->
+            readUByteYielding().let { byte ->
                 if (byte == kEscapeByte) {
                     val nextByte = readUByte()
                     escapedBuffer.writeUByte(nextByte xor 0x20u)
@@ -105,7 +141,7 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
     }
     
     context(scope: SequenceScope<Unit>)
-    private suspend fun Source.readUByte(): UByte {
+    private suspend fun Source.readUByteYielding(): UByte {
         while (exhausted()) scope.yield(Unit)
         return readUByte()
     }
