@@ -14,10 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @Logged
 class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
-
-
-    // TODO: Need to make a sum check
-
     // port serial instance
     private var serialPort =
         SerialPort(115200, port)
