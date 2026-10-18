@@ -9,12 +9,7 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.SerialPort
 import frc.robot.constants.kEscapeByte
 import frc.robot.constants.kFrameSignature
-import kotlinx.io.Buffer
-import kotlinx.io.Source
-import kotlinx.io.readFloatLe
-import kotlinx.io.readUByte
-import kotlinx.io.readUIntLe
-import kotlinx.io.writeUByte
+import net.jpountz.xxhash.XXHashFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Logged
@@ -42,6 +37,17 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
 
             val lengthTag = buffer.escape(4).readUIntLe()
             val payload = buffer.escape(lengthTag.toLong())
+            val checksumTag = buffer.escape(4).readUIntLe()
+
+            val factory = XXHashFactory.safeInstance()
+
+            val checksum = factory.hash32()
+                .hash(payload.peek().readByteArray(), 0, payload.size.toInt(), 0)
+                .toUInt()
+
+            if (checksum != checksumTag) {
+                continue
+            }
 
             odometryData = OdometryData(
                 payload.readFloatLe(),
