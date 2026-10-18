@@ -12,22 +12,25 @@ import frc.robot.constants.kShooterConfig
 import frc.robot.constants.kShootingVelocity
 
 @Logged
-class Shooter : SubsystemBase() {
-    private val request = VelocityVoltage(0.0)
-    
+class Shooter : SubsystemBase(), AutoCloseable {
+    private val velocityRequest = VelocityVoltage(0.0)
+    private val voltageRequest = VoltageOut(0.0)
+
     private val shooterMotor = TalonFX(kShootCANID)
-    
+
     init {
         shooterMotor.configurator.apply(kShooterConfig)
+
+        SmartDashboard.putNumber("Shooter/ShootingVelocity", 100.0)
     }
-     
+
     fun shoot(velocity: Double) {
-        shooterMotor.setControl(request.withVelocity(velocity))
+        shooterMotor.setControl(velocityRequest.withVelocity(velocity))
     }
-    
+
     fun shoot(): Command {
         return startEnd({
-            shoot(kShootingVelocity)           
+            shoot(SmartDashboard.getNumber("Shooter/ShootingVelocity", 100.0))
         }, {
             stop()
         })
