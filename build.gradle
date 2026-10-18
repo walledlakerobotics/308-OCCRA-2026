@@ -1,7 +1,15 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.4.20'
     id 'org.jetbrains.kotlin.kapt' version '2.4.20'
     id 'edu.wpi.first.GradleRIO' version '2026.2.1'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 kotlin {
