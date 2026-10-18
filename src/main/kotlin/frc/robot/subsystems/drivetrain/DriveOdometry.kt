@@ -103,6 +103,13 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
             isRunning.set(false)
         }
     }
+
+    val position: Pose2d
+        get() = odometryData.position
+
+    val velocity: ChassisSpeeds
+        get() = odometryData.velocity
+
     init {
         serialPortSim?.apply {
             println("Using simulated serial port")
@@ -142,16 +149,6 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
     private suspend fun Source.readUByteYielding(): UByte {
         while (exhausted()) scope.yield(Unit)
         return readUByte()
-    }
-
-    val position: Pose2d
-        get() = odometryData.position
-
-    val velocity: ChassisSpeeds
-        get() = odometryData.velocity
-
-    init {
-        notifier.startPeriodic(0.01)
     }
 
     override fun close() {
