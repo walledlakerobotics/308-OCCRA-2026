@@ -153,6 +153,8 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
 
     override fun close() {
         serialPort.close()
+        serialPortSim?.closePort()
+        
         notifier.close()
     }
 }
