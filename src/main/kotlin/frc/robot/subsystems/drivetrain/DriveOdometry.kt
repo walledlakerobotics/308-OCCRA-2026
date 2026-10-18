@@ -103,6 +103,7 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
             isRunning.set(false)
         }
     }
+    init {
         serialPortSim?.apply {
             println("Using simulated serial port")
             
@@ -114,6 +115,8 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
             openPort()
         }
 
+        notifier.startPeriodic(0.01)
+    }
 
     context(scope: SequenceScope<Unit>)
     private suspend fun Source.escape(count: Long): Buffer {
