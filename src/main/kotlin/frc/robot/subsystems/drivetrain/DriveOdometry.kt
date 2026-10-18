@@ -24,9 +24,8 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
 
     @Volatile
     private var odometryData = OdometryData(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-    
-    private val isRunning = AtomicBoolean(false)
 
+    private val isRunning = AtomicBoolean(false)
 
     private val buffer = Buffer()
     private val dataSequence = sequence {
@@ -119,23 +118,23 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
     context(scope: SequenceScope<Unit>)
     private suspend fun Source.escape(count: Long): Buffer {
         val escapedBuffer = Buffer()
-        
+
         while (escapedBuffer.size < count) {
             readUByteYielding().let { byte ->
                 if (byte == kEscapeByte) {
-                    val nextByte = readUByte()
+                    val nextByte = readUByteYielding()
                     escapedBuffer.writeUByte(nextByte xor 0x20u)
-                    
+
                     continue
                 }
-                
+
                 escapedBuffer.writeUByte(byte)
             }
         }
-        
+
         return escapedBuffer
     }
-    
+
     context(scope: SequenceScope<Unit>)
     private suspend fun Source.readUByteYielding(): UByte {
         while (exhausted()) scope.yield(Unit)
@@ -171,7 +170,7 @@ data class OdometryData(
             Translation2d(positionX, positionY),
             Rotation2d.fromRadians(positionHeading)
         )
-        
+
     val velocity: ChassisSpeeds
         get() = ChassisSpeeds(
             velocityX,
@@ -181,7 +180,7 @@ data class OdometryData(
         
     val velocityFieldRelative: ChassisSpeeds
         get() = ChassisSpeeds.fromRobotRelativeSpeeds(velocity, position.rotation)
-        
+
     constructor(
         positionX: Float,
         positionY: Float,
@@ -197,7 +196,7 @@ data class OdometryData(
         velocityY.toDouble(),
         velocityHeading.toDouble()
     )
-        
+
     constructor() : this(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 }
 
