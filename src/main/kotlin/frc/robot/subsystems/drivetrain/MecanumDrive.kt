@@ -25,6 +25,8 @@ class MecanumDrive : SubsystemBase(), AutoCloseable {
     private val frontRightNeo = SparkMax(kFrontRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backLeftNeo = SparkMax(kBackLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backRightNeo = SparkMax(kBackRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
+    
+    private val driveOdometry = DriveOdometry(SerialPort.Port.kUSB1)
 
     private val kinematics = MecanumDriveKinematics(
         kFrontLeftNeoTranslation,
