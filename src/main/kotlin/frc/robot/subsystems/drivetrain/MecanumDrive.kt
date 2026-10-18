@@ -13,8 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.constants.*
 
 @Logged
-class MecanumDrive : SubsystemBase() {
-
+class MecanumDrive : SubsystemBase(), AutoCloseable {
     private val frontLeftNeo = SparkMax(kFrontLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val frontRightNeo = SparkMax(kFrontRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backLeftNeo = SparkMax(kBackLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
@@ -59,5 +58,14 @@ class MecanumDrive : SubsystemBase() {
 
     fun stop() {
         drive(ChassisSpeeds())
+    }
+    
+    override fun close() {
+        frontLeftNeo.close()
+        frontRightNeo.close()
+        backLeftNeo.close()
+        backRightNeo.close()
+
+        driveOdometry.close()
     }
 }

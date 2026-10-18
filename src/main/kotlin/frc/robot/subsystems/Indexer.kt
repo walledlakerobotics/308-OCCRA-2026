@@ -37,4 +37,12 @@ class Indexer : SubsystemBase(), AutoCloseable {
             leftMotor.set(0.0)
             rightMotor.set(0.0)
         })
+
+    override fun close() {
+        leftMotor.close()
+        rightMotor.close()
+
+        leftSensor.close()
+        rightSensor.close()
+    }
 }

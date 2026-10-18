@@ -2,7 +2,6 @@ package frc.robot
 
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -15,7 +14,7 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.drivetrain.MecanumDrive
 
 @Logged
-class RobotContainer {
+class RobotContainer : AutoCloseable {
     val driverController = CommandXboxController(kDriverControllerPort)
     val coDriverController = CommandXboxController(kCoDriverControllerPort)
 
@@ -65,4 +64,10 @@ class RobotContainer {
             return Commands.none()
         }
 
+    override fun close() {
+        drivetrain.close()
+        intake.close()
+        indexer.close()
+        shooter.close()
+    }
 }
