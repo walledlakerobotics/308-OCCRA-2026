@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id 'java'
     id 'org.jetbrains.kotlin.jvm' version '2.4.20'
     id 'org.jetbrains.kotlin.kapt' version '2.4.20'
     id 'edu.wpi.first.GradleRIO' version '2026.2.1'
@@ -96,6 +97,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
     
     implementation 'org.lz4:lz4-pure-java:1.8.0'
+    implementation 'com.fazecast:jSerialComm:[2.0.0,3.0.0)'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-io-core:0.9.1'
 }
