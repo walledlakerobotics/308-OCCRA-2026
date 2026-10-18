@@ -22,7 +22,8 @@ struct p_data
 
   std::vector<uint8_t> to_bytes()
   {
-    std::vector<uint8_t> bytes(sizeof(float) * 6);
+    std::vector<uint8_t> bytes;
+    bytes.reserve(sizeof(float) * 6);
 
     push_to_buffer(bytes, position_x);
     push_to_buffer(bytes, position_y);

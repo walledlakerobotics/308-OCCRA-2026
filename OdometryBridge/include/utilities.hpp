@@ -26,7 +26,9 @@ void push_to_buffer(std::vector<uint8_t> &buffer, const T &data)
 template <typename T>
 std::vector<uint8_t> to_bytes(const T &data)
 {
-    std::vector<uint8_t> bytes(sizeof(T));
+    std::vector<uint8_t> bytes;
+    bytes.reserve(sizeof(T));
+
     push_to_buffer(bytes, data);
 
     return bytes;

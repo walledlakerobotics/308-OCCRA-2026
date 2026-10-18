@@ -23,7 +23,8 @@ void push_escaping(std::vector<uint8_t> &buffer, const std::vector<uint8_t> &dat
 std::vector<uint8_t> create_frame(const std::vector<uint8_t> &payload)
 {
     // Reserve space for worst-case scenario
-    std::vector<uint8_t> buffer(sizeof(frame_signature) + sizeof(size_t) * 2 + payload.size() * 2 + sizeof(XXH32_hash_t) * 2);
+    std::vector<uint8_t> buffer;
+    buffer.reserve(sizeof(frame_signature) + sizeof(size_t) * 2 + payload.size() * 2 + sizeof(XXH32_hash_t) * 2);
 
     buffer.push_back(frame_signature);
 
