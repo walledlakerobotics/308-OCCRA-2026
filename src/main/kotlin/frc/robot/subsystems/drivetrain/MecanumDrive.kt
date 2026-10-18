@@ -75,6 +75,15 @@ class MecanumDrive : SubsystemBase(), AutoCloseable {
     fun stop() {
         drive(ChassisSpeeds())
     }
+
+    fun setIdleMode(mode: SparkBaseConfig.IdleMode) {
+        val config = SparkMaxConfig().idleMode(mode)
+        
+        frontLeftNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
+        frontRightNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
+        backLeftNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
+        backRightNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
+    }
     
     override fun close() {
         frontLeftNeo.close()
