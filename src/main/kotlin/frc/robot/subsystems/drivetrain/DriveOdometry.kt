@@ -10,7 +10,13 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.SerialPort
 import frc.robot.constants.kEscapeByte
 import frc.robot.constants.kFrameSignature
-import kotlinx.io.*
+import kotlinx.io.Buffer
+import kotlinx.io.Source
+import kotlinx.io.readByteArray
+import kotlinx.io.readFloatLe
+import kotlinx.io.readUByte
+import kotlinx.io.readUIntLe
+import kotlinx.io.writeUByte
 import net.jpountz.xxhash.XXHashFactory
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
@@ -133,16 +139,16 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
         val escapedBuffer = Buffer()
 
         while (escapedBuffer.size < count) {
-            readUByteYielding().let { byte ->
-                if (byte == kEscapeByte) {
-                    val nextByte = readUByteYielding()
-                    escapedBuffer.writeUByte(nextByte xor 0x20u)
+            val byte = readUByteYielding()
+        
+            if (byte == kEscapeByte) {
+                val nextByte = readUByteYielding()
+                escapedBuffer.writeUByte(nextByte xor 0x20u)
 
-                    continue
-                }
-
-                escapedBuffer.writeUByte(byte)
+                continue
             }
+
+            escapedBuffer.writeUByte(byte)
         }
 
         return escapedBuffer

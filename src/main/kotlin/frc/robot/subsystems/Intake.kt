@@ -2,6 +2,7 @@ package frc.robot.subsystems
 
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.TalonFX
+import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.units.Units.RotationsPerSecond
 import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -11,7 +12,7 @@ import frc.robot.constants.kIntakeCANID
 import frc.robot.constants.kIntakeerConfig
 
 @Logged
-class Intake : SubsystemBase() : AutoClosable {
+class Intake : SubsystemBase(), AutoCloseable {
     val intakeMotor = TalonFX(kIntakeCANID)
     val request = VelocityVoltage(0.0)
 
