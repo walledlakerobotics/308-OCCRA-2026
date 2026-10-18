@@ -40,5 +40,29 @@ class Shooter : SubsystemBase() {
     override fun periodic() {
         SmartDashboard.putNumber("Shooter/Velocity", shooterMotor.velocity.valueAsDouble)
     }
-    
+
+    private val sysIdRoutine = SysIdRoutine(
+        SysIdRoutine.Config(null, null, null) { state ->
+            SignalLogger.writeString("sysid-test-state-shooter", state.toString())
+        },
+        SysIdRoutine.Mechanism({ volts ->
+            shooterMotor.setControl(voltageRequest.withOutput(volts))
+        }, null, this, "shooter")
+    )
+
+    val sysIdForwardQuasistatic: Command
+        get() = sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward)
+
+    val sysIdReverseQuasistatic: Command
+        get() = sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse)
+
+    val sysIdForwardDynamic: Command
+        get() = sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward)
+
+    val sysIdReverseDynamic: Command
+        get() = sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+
+    override fun close() {
+        shooterMotor.close()
+    }
 }
