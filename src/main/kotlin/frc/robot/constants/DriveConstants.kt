@@ -6,7 +6,8 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
 
 // meters/second
-const val kSpeedFactor = 10
+const val kTranslationFactor = 5
+const val kRotationFactor = 7
 
 const val kFrontLeftMotorCANID = 2
 const val kFrontRightMotorCANID = 4
@@ -19,7 +20,7 @@ val kBackLeftNeoTranslation = Translation2d(Units.inchesToMeters(-10.0), Units.i
 val kBackRightNeoTranslation = Translation2d(Units.inchesToMeters(-10.0), Units.inchesToMeters(-11.75))
 
 
-val kSparkMaxConfig: SparkMaxConfig
+private val kSparkMaxConfig: SparkBaseConfig
     get() {
         val config = SparkMaxConfig()
 
@@ -31,6 +32,7 @@ val kSparkMaxConfig: SparkMaxConfig
         config
             .idleMode(SparkBaseConfig.IdleMode.kCoast)
             .smartCurrentLimit(45) // amps
+            .voltageCompensation(12.0) // volts
 
         val c = Math.PI * Units.inchesToMeters(6.0)
 
@@ -41,19 +43,8 @@ val kSparkMaxConfig: SparkMaxConfig
         return config
     }
 
-val kLeftConfig: SparkMaxConfig
-    get() {
-        val config = kSparkMaxConfig
-        config.inverted(false)
+val kLeftConfig: SparkBaseConfig
+    get() = kSparkMaxConfig.inverted(false)
 
-        return config
-    }
-
-val kRightConfig: SparkMaxConfig
-    get() {
-        val config = kSparkMaxConfig
-        config.inverted(true)
-
-        return config
-    }
-    
+val kRightConfig: SparkBaseConfig
+    get() = kSparkMaxConfig.inverted(true)
