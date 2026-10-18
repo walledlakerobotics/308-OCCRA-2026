@@ -159,6 +159,7 @@ class DriveOdometry(val port: SerialPort.Port) : AutoCloseable {
     }
 }
 
+@Logged
 data class OdometryData(
     val positionX: Double,
     val positionY: Double,
