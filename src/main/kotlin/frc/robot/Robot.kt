@@ -24,11 +24,15 @@ class Robot : TimedRobot() {
             0,
             WPILibVersion.Version
         )
-        
+
         DataLogManager.start()
         DriverStation.startDataLog(DataLogManager.getLog())
-        
+
         Epilogue.bind(this)
+        
+        if (isSimulation()) {
+            DriverStation.silenceJoystickConnectionWarning(true)
+        }
     }
 
     override fun robotPeriodic() {
