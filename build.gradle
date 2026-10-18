@@ -127,3 +127,7 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+tasks.withType(KotlinCompile) {
+    compilerOptions.freeCompilerArgs.add '-Xstring-concat=inline'
+}
