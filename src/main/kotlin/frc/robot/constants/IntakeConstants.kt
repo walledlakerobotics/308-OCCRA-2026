@@ -1,5 +1,7 @@
 package frc.robot.constants
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs
+import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.NeutralModeValue
@@ -17,18 +19,19 @@ const val kIntakeCANID = 22
 val kIntakeingVelocity = RotationsPerSecond.of(3.0)!!
 
 val kIntakeerConfig: TalonFXConfiguration
-    get() {
-        val config = TalonFXConfiguration()
-
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast
-
-        val gainConfig = Slot0Configs()
-
-        gainConfig.kP = 0.4
-        gainConfig.kI = 0.0
-        gainConfig.kD = 0.1
-
-        config.withSlot0(gainConfig)
-
-        return config
-    }
+    get() = TalonFXConfiguration()
+        .withMotorOutput(
+            MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Coast)
+        )
+        .withCurrentLimits(
+            CurrentLimitsConfigs()
+                .withStatorCurrentLimit(100.0)
+                .withSupplyCurrentLimit(60.0)
+        )
+        .withSlot0(
+            Slot0Configs()
+                .withKP(0.4)
+                .withKI(0.0)
+                .withKD(0.1)
+        )
