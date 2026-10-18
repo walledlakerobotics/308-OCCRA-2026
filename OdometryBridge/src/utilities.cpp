@@ -1,6 +1,4 @@
 #include "utilities.hpp"
-#include <cstring>
-#include <xxhash.h>
 
 void push_escaping(std::vector<uint8_t> &buffer, const std::vector<uint8_t> &data)
 {
