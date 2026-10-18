@@ -25,6 +25,22 @@ class MecanumDrive : SubsystemBase(), AutoCloseable {
         kBackLeftNeoTranslation,
         kBackRightNeoTranslation
     )
+    
+    val wheelSpeeds
+        get() = MecanumDriveWheelSpeeds(
+            frontLeftNeo.encoder.velocity,
+            frontRightNeo.encoder.velocity,
+            backLeftNeo.encoder.velocity,
+            backRightNeo.encoder.velocity,
+        )
+
+    val wheelCurrents
+        get() = MecanumDriveWheelSpeeds(
+            frontLeftNeo.outputCurrent,
+            frontRightNeo.outputCurrent,
+            backLeftNeo.outputCurrent,
+            backRightNeo.outputCurrent,
+        )
 
     init {
         frontLeftNeo.configure(kLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
