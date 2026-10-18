@@ -26,25 +26,25 @@ class Intake : SubsystemBase() {
     init {
         intakeMotor.configurator.apply(kIntakeerConfig)
     }
-    
-    fun motorIntake(velocity: AngularVelocity){
+
+    fun motorIntake(velocity: AngularVelocity) {
         intakeMotor.setControl(request.withVelocity(velocity))
     }
-    
+
     fun motorIntake(velocity: Double) {
-        motorIntake(RotationsPerSecond.of(velocity))
+        intakeMotor.setVoltage(velocity)
     }
-    
+
     val intake: Command
         get() = startEnd({
-                motorIntake(kIntakeingVelocity)
-            }, {
-                motorIntake(0.0)
-            })
+            motorIntake(4.0)
+        }, {
+            motorIntake(0.0)
+        })
 
     override fun periodic() {
         SmartDashboard.putNumber("Intake/Velocity", intakeMotor.velocity.value.`in`(RotationsPerSecond))
-        
+
         // val kP = SmartDashboard.getNumber("Intake/kP", 0.0)
         // val kI = SmartDashboard.getNumber("Intake/kI", 0.0)
         // val kD = SmartDashboard.getNumber("Intake/kD", 0.0)
