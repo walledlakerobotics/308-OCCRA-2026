@@ -6,10 +6,13 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.Notifier
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.SerialPort
 import frc.robot.constants.kEscapeByte
 import frc.robot.constants.kFrameSignature
+import kotlinx.io.*
 import net.jpountz.xxhash.XXHashFactory
+import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Logged
@@ -180,7 +183,7 @@ data class OdometryData(
             velocityY,
             velocityHeading
         )
-        
+
     val velocityFieldRelative: ChassisSpeeds
         get() = ChassisSpeeds.fromRobotRelativeSpeeds(velocity, position.rotation)
 
