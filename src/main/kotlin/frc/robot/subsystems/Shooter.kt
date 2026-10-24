@@ -23,20 +23,27 @@ class Shooter : SubsystemBase(), AutoCloseable {
     init {
         shooterMotor.configurator.apply(kShooterConfig)
 
-        SmartDashboard.putNumber("Shooter/ShootingVelocity", 100.0)
+        SmartDashboard.putNumber("Shooter/ShootingVelocity", 62.0)
     }
 
     fun shoot(velocity: Double) {
         shooterMotor.setControl(velocityRequest.withVelocity(velocity))
     }
 
-    fun shoot(): Command {
-        return startEnd({
+    val shoot: Command
+        get() = startEnd({
             shoot(SmartDashboard.getNumber("Shooter/ShootingVelocity", 100.0))
         }, {
             stop()
         })
-    }
+
+    val shootReverse: Command
+        get() = startEnd({
+            shoot(-5.0)
+        }, {
+            stop()
+        })
+    
 
     fun stop() {
         shoot(0.0)
@@ -66,6 +73,9 @@ class Shooter : SubsystemBase(), AutoCloseable {
 
     val sysIdReverseDynamic: Command
         get() = sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)
+        
+    val atGoal: Boolean
+        get() = shooterMotor.velocity.valueAsDouble >= SmartDashboard.getNumber("Shooter/ShootingVelocity", 62.0) * 0.95
 
     override fun close() {
         shooterMotor.close()

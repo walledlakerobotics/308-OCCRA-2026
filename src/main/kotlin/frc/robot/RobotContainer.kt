@@ -4,10 +4,13 @@ import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.Commands.waitSeconds
+import edu.wpi.first.wpilibj2.command.Commands.waitUntil
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.constants.kCoDriverControllerPort
 import frc.robot.constants.kDeadBandThreshold
 import frc.robot.constants.kDriverControllerPort
+import frc.robot.subsystems.Feeder
 import frc.robot.subsystems.Indexer
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
@@ -21,6 +24,7 @@ class RobotContainer : AutoCloseable {
     val drivetrain = Drivetrain()
     val intake = Intake()
     val indexer = Indexer()
+    val feeder = Feeder()
     val shooter = Shooter()
 
     init {
@@ -31,16 +35,25 @@ class RobotContainer : AutoCloseable {
             { -MathUtil.applyDeadband(driverController.rightX, kDeadBandThreshold) }
         )
 
-        coDriverController.a().whileTrue(indexer.indexer.alongWith(intake.intake))
+        coDriverController.leftBumper()
+            .whileTrue(indexer.indexer.alongWith(intake.intake).alongWith(feeder.reverse))
+            .onFalse(
+                indexer.indexerReverse.withTimeout(0.05)
+                    .alongWith(shooter.shootReverse.withTimeout(0.1))
+            )
+            
+        coDriverController.leftTrigger().whileTrue(indexer.indexerReverse)
         // coDriverController.a().whileTrue(intake.intake)
 
-        coDriverController.b().whileTrue(shooter.shoot())
+        coDriverController.rightBumper().whileTrue(shooter.shoot)
+        
+        coDriverController.rightTrigger().whileTrue(waitSeconds(0.5).andThen(indexer.indexer).alongWith(feeder.feed))
 
-        coDriverController.leftBumper().whileTrue(shooter.sysIdForwardQuasistatic)
-        coDriverController.rightBumper().whileTrue(shooter.sysIdReverseQuasistatic)
+        // coDriverController.leftBumper().whileTrue(shooter.sysIdForwardQuasistatic)
+        // coDriverController.rightBumper().whileTrue(shooter.sysIdReverseQuasistatic)
 
-        coDriverController.leftTrigger().whileTrue(shooter.sysIdForwardDynamic)
-        coDriverController.rightTrigger().whileTrue(shooter.sysIdReverseDynamic)
+        // coDriverController.leftTrigger().whileTrue(shooter.sysIdForwardDynamic)
+        // coDriverController.rightTrigger().whileTrue(shooter.sysIdReverseDynamic)
 
         driverController.leftBumper().whileTrue(
             drivetrain.drive(
@@ -68,6 +81,7 @@ class RobotContainer : AutoCloseable {
         drivetrain.close()
         intake.close()
         indexer.close()
+        feeder.close()
         shooter.close()
     }
 }

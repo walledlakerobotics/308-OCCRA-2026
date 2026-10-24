@@ -18,7 +18,7 @@ private val kIndexerMotorConfig: SparkBaseConfig
 
         config
             .idleMode(SparkBaseConfig.IdleMode.kCoast)
-            .smartCurrentLimit(45) // amps
+            .smartCurrentLimit(20) // amps
             .voltageCompensation(12.0) // volts
 
         return config
