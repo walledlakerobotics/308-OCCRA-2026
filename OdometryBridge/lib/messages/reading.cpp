@@ -22,8 +22,7 @@ Buffer unescape(SerialBuffer &data, size_t count)
 
 bool read_frame(SerialBuffer &data, Buffer &output)
 {
-    while (data.pop_blocking<uint8_t>() != frame_signature)
-        ; // Wait for the frame signature
+    while (data.pop_blocking<uint8_t>() != frame_signature); // Wait for the frame signature
 
     size_t length_tag = unescape(data, sizeof(size_t)).pop<size_t>(); // Read the length tag
 
