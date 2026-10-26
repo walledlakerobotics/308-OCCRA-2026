@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers
 import frc.robot.constants.*
 import frc.robot.lib.BLine.FollowPath
-import frc.robot.lib.BLine.Path
 import kotlin.math.absoluteValue
 
 @Logged
@@ -30,18 +29,18 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
     private val frontRightNeo = SparkMax(kFrontRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backLeftNeo = SparkMax(kBackLeftMotorCANID, SparkLowLevel.MotorType.kBrushless)
     private val backRightNeo = SparkMax(kBackRightMotorCANID, SparkLowLevel.MotorType.kBrushless)
-    
+
     private val odometry = Pinpoint(SerialPort.Port.kUSB)
-    
+
     val position
         get() = odometry.position
-        
-    val rotation
+
+    val heading
         get() = odometry.position.rotation!!
-        
+
     val velocity
         get() = odometry.velocity
-        
+
     val builder = FollowPath.Builder(
         this,
         { position },
@@ -49,8 +48,8 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         { drive(it) },
         PIDController(0.5, 0.0, 0.0),
         PIDController(0.5, 0.0, 0.0),
-        PIDController(0.5, 0.0, 0.0)    
-    ).withPoseReset { odometry.resetPosition(it) }!!
+        PIDController(0.5, 0.0, 0.0)
+    ).withPoseReset { odometry.position = it }!!
 
     private val kinematics = MecanumDriveKinematics(
         kFrontLeftNeoTranslation,
@@ -58,7 +57,7 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         kBackLeftNeoTranslation,
         kBackRightNeoTranslation
     )
-    
+
     val wheelSpeeds
         get() = MecanumDriveWheelSpeeds(
             frontLeftNeo.encoder.velocity,
@@ -81,26 +80,37 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         backLeftNeo.configure(kLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
         backRightNeo.configure(kRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
 
+        odometry.setEncoderOffsets(kOffsetX, kOffsetY)
+        odometry.setEncoderDirections(kXEncoderDirection, kYEncoderDirection)
+        
+        odometry.setEncoderResolution(kTicksPerMM)
+
         RobotModeTriggers.disabled()
             .onTrue(Commands.runOnce({ setIdleMode(SparkBaseConfig.IdleMode.kCoast) }))
             .onFalse(Commands.runOnce({ setIdleMode(SparkBaseConfig.IdleMode.kBrake) }))
-
-        val path = Path("Path 1")
-        
-        val follow = builder.build(path)
-        
-        
     }
-    
+
     fun drive(speeds: ChassisSpeeds) {
         // gets kinematic velocity's
         val wheelSpeeds = kinematics.toWheelSpeeds(speeds)
 
         // sets the set point.
-        frontLeftNeo.closedLoopController.setSetpoint(wheelSpeeds.frontLeftMetersPerSecond, SparkBase.ControlType.kVelocity)
-        frontRightNeo.closedLoopController.setSetpoint(wheelSpeeds.frontRightMetersPerSecond, SparkBase.ControlType.kVelocity)
-        backRightNeo.closedLoopController.setSetpoint(wheelSpeeds.rearRightMetersPerSecond, SparkBase.ControlType.kVelocity)
-        backLeftNeo.closedLoopController.setSetpoint(wheelSpeeds.rearLeftMetersPerSecond, SparkBase.ControlType.kVelocity)
+        frontLeftNeo.closedLoopController.setSetpoint(
+            wheelSpeeds.frontLeftMetersPerSecond,
+            SparkBase.ControlType.kVelocity
+        )
+        frontRightNeo.closedLoopController.setSetpoint(
+            wheelSpeeds.frontRightMetersPerSecond,
+            SparkBase.ControlType.kVelocity
+        )
+        backRightNeo.closedLoopController.setSetpoint(
+            wheelSpeeds.rearRightMetersPerSecond,
+            SparkBase.ControlType.kVelocity
+        )
+        backLeftNeo.closedLoopController.setSetpoint(
+            wheelSpeeds.rearLeftMetersPerSecond,
+            SparkBase.ControlType.kVelocity
+        )
 
         SmartDashboard.putNumber("Drive/Goal/FrontLeft", wheelSpeeds.frontLeftMetersPerSecond)
         SmartDashboard.putNumber("Drive/Goal/FrontRight", wheelSpeeds.frontRightMetersPerSecond)
@@ -113,7 +123,7 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         driftPID.enableContinuousInput(-180.0, 180.0)
 
         var prevHeading: Rotation2d? = null
-        
+
         return startRun({ driftPID.reset() }) {
             val x = x() * kTranslationFactor
             val y = y() * kTranslationFactor
@@ -141,13 +151,13 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
 
     fun setIdleMode(mode: SparkBaseConfig.IdleMode) {
         val config = SparkMaxConfig().idleMode(mode)
-        
+
         frontLeftNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
         frontRightNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
         backLeftNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
         backRightNeo.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
     }
-    
+
     override fun close() {
         frontLeftNeo.close()
         frontRightNeo.close()

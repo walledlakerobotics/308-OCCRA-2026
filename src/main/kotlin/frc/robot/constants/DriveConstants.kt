@@ -4,6 +4,8 @@ import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
+import edu.wpi.first.units.Units.Millimeters
+import frc.robot.subsystems.drivetrain.EncoderDirection
 
 // meters/second
 const val kTranslationFactor = 5
@@ -48,3 +50,17 @@ val kLeftConfig: SparkBaseConfig
 
 val kRightConfig: SparkBaseConfig
     get() = kSparkMaxConfig.inverted(true)
+    
+// Odometry pods
+const val kWheelDiameter = 38 // mm
+const val kWheelCircumference = kWheelDiameter * Math.PI // mm
+
+const val kTicksPerRevolution = 4096
+
+const val kTicksPerMM = kTicksPerRevolution / kWheelCircumference
+
+val kOffsetX = Millimeters.of(0.0)!!
+val kOffsetY = Millimeters.of(0.0)!!
+
+val kXEncoderDirection = EncoderDirection.BACKWARD
+val kYEncoderDirection = EncoderDirection.FORWARD
