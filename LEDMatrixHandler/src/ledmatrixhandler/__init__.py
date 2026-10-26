@@ -8,7 +8,5 @@ def main() -> None:
     sprite = Sprite("assets/eye_test.png")
 
     loop.add(sprite)
-
-
-
+    
     loop.start()

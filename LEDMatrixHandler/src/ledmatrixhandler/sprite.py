@@ -1,34 +1,64 @@
 from ledmatrix import Canvas
 from .display import Display
 from PIL import Image
+import json
 
-import math 
+# import math
 
-from .sprite_vector import Vec2
+# from .sprite_vector import Vec2
 
 class Sprite(Display):
-    offset: Vec2 = Vec2.zero()
-    offset_velocity: Vec2 = Vec2.zero()
 
-    sprite_offset: Vec2 = Vec2.zero()
-    sprite_bounds: Vec2 = Vec2.zero()
+    current_animation: str = "idle"
+    animated: bool = False
 
     def __init__(self, file_dir: str) -> None:
+
+        self.__file_dir = file_dir
 
         try:
             with Image.open(file_dir) as img: 
                 self.__img = img
-                self.__data = img.getdata()
+                self.__img.load()
                 print("loaded image", file_dir)
+
         except:
             print("couldn't find image: ", file_dir)
 
     def update(self, dt: float) -> None:
         pass
 
-        # self.offset += self.offset_velocity * dt
-
     def render(self, canvas: Canvas) -> None:
-        for y in range(math.floor(self.offset.y), self.__img.height):
-            for x in range(math.floor(self.offset.x), self.__img.width):
-                canvas.set_pixel(x, y, self.__img.getpixel((x, y)))
+
+        offset_data = (0, 0, self.__img.width, self.__img.height)
+
+        # if self.animated:
+        #     offset_data = self.update_frame_offset(self.current_animation, self.frames)
+
+        sprite_offx = offset_data[0]
+        sprite_offy = offset_data[1]
+
+        width = offset_data[2]
+        height = offset_data[3]
+
+        for y in range(width):
+            for x in range(height):
+                pixel = self.__img.getpixel((x + sprite_offx, y + sprite_offy))
+
+                if pixel is None:
+                    continue
+
+                canvas.set_pixel(
+                    x,
+                    y,
+                    pixel
+                )
+
+    # def update_frame_offset(self, animation_name: str) -> tuple:
+    #     json_path: str = self.__file_dir.replace(".png", ".json")
+
+    #     with open(json_path) as file:
+    #         data = json.load(file)
+
+    #     frames = data["frames"]
+    #     tags = data["meta"]["frameTags"]
