@@ -5,7 +5,7 @@ from .sprite_vector import Vec2
 def main() -> None:
     loop = MainLoop(30)
 
-    sprite = Sprite("assets/eye_test.png")
+    sprite = Sprite("assets/eye_source-Sheet.png", True)
 
     loop.add(sprite)
     
