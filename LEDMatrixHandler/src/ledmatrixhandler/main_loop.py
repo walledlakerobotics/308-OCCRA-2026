@@ -1,4 +1,4 @@
-from .module import Module
+from .display import Display
 
 import time
 from ledmatrix import open_device, Canvas, MatrixGeometry
@@ -7,7 +7,7 @@ class MainLoop:
 
     def __init__(self, fps: float): 
         self.__running: bool = False
-        self.__modules: list[Module] = list()
+        self.__modules: list[Display] = list()
 
         self.__frames_per_second: float = fps
         self.__last_time: float = 0.0
@@ -27,7 +27,7 @@ class MainLoop:
 
             # pygame stuff
 
-            
+
 
 
             print("loaded pygame!")
@@ -84,8 +84,8 @@ class MainLoop:
         self.__running = False
 
 
-    def add(self, mod: Module): 
-        self.__modules.append(mod)
+    def add(self, dis: Display): 
+        self.__modules.append(dis)
 
     # def remove(self, tag: str): 
     #     pass

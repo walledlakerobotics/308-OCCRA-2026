@@ -1,13 +1,14 @@
 from ledmatrix import Canvas
-from .module import Module
-from typing import Optional
+from .display import Display
 
-import PIL
+from PIL import Image
 
-class Sprite(Module):
+class Sprite(Display):
 
-    def __init__(self, file_dir: Optional[str]) -> None:
+    def __init__(self, file_dir: str) -> None:
+
         pass
+
 
     def update(self, dt: float) -> None:
         pass

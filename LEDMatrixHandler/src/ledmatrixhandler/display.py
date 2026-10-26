@@ -4,7 +4,7 @@ from ledmatrix import Canvas
 import uuid
 from typing import Optional
 
-class Module: 
+class Display: 
 
     tag: str = str(uuid.uuid4())
 
