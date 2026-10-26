@@ -11,38 +11,14 @@ void setup()
   // port
   Serial.begin(115200);
 
+  Wire.setClock(400000); // 400kHz I2C
+  Wire.setTimeout(10); // 10ms timeout for I2C operations
+
   // configurating pinpoint
   pinpoint.begin();
-  pinpoint.setEncoderDirections(goBILDA::EncoderDirection::Backward, goBILDA::EncoderDirection::Forward);
-  pinpoint.setOffsets(0.0f, 0.0f);
-
-  pinpoint.setBulkReadScope({
-    goBILDA::PinpointRegisters::EncoderValueX,
-    goBILDA::PinpointRegisters::EncoderValueY,
-    goBILDA::PinpointRegisters::PositionX,
-    goBILDA::PinpointRegisters::PositionY,
-    goBILDA::PinpointRegisters::QuaternionW,
-    goBILDA::PinpointRegisters::QuaternionX,
-    goBILDA::PinpointRegisters::QuaternionY,
-    goBILDA::PinpointRegisters::QuaternionZ,
-    goBILDA::PinpointRegisters::VelocityX,
-    goBILDA::PinpointRegisters::VelocityY,
-    goBILDA::PinpointRegisters::VelocityH
-  });
-
-      // this might change
-      constexpr float diamater_mm = 38.0f;
-  constexpr float circumference_mm = diamater_mm * std::numbers::pi;
-  constexpr int ticks_per_revolution = 4069;
-
-  constexpr float ticks_per_mm = ticks_per_revolution / circumference_mm; // 760 ticks per revolution / circumference_mm
-
-  pinpoint.setEncoderResolution(ticks_per_mm);
 
   delay(2000);
 }
-
-bool test = false;
 
 void loop()
 {
@@ -57,6 +33,21 @@ void loop()
       pinpoint.setPosition(goBILDA::Pose2D(data_ptr->position_x, data_ptr->position_y, data_ptr->position_heading));
     }
 
+    if (data_ptr->set_offsets) {
+      pinpoint.setOffsets(data_ptr->offset_x, data_ptr->offset_y);
+    }
+
+    if (data_ptr->set_directions) {
+      pinpoint.setEncoderDirections(
+        data_ptr->x_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward,
+        data_ptr->y_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward
+      );
+    }
+
+    if (data_ptr->set_resolution) {
+      pinpoint.setEncoderResolution(data_ptr->resolution);
+    }
+
     delete data_ptr;
   }
 
@@ -67,10 +58,11 @@ void loop()
   position_data.encoder_y = bulk_data.EncoderY;
   position_data.position_x = bulk_data.Position.x;
   position_data.position_y = bulk_data.Position.y;
-  position_data.quaternion_w = bulk_data.quaternion.w;
-  position_data.quaternion_x = bulk_data.quaternion.x;
-  position_data.quaternion_y = bulk_data.quaternion.y;
-  position_data.quaternion_z = bulk_data.quaternion.z;
+  position_data.position_heading = bulk_data.Position.heading;
+  position_data.quaternion_w = pinpoint.getQuaternion().w;
+  position_data.quaternion_x = pinpoint.getQuaternion().x;
+  position_data.quaternion_y = pinpoint.getQuaternion().y;
+  position_data.quaternion_z = pinpoint.getQuaternion().z;
   position_data.velocity_x = bulk_data.VelocityX;
   position_data.velocity_y = bulk_data.VelocityY;
   position_data.velocity_heading = bulk_data.VelocityH;
@@ -83,7 +75,6 @@ void loop()
   size_t buffer_size = buffer.size();
 
   // sends data and waits for it to complete.
-  // Serial.println("Buffer first " + String(buffer.pop()));
   Serial.write(buffer.data(), buffer_size);
 
   delay(5);
@@ -106,6 +97,7 @@ void setup1()
       rp2040.fifo.push(reinterpret_cast<uint32_t>(data_ptr));
     }
 
+    yield();
     delay(10);
   }
 }
