@@ -26,9 +26,8 @@ class MainLoop:
             self.__testing = True
             print("opening sim...")
 
-            # pygame stuff
-
-            print("loaded pygame!")
+            
+            print("loaded qt!")
 
     def __update(self, dt: float) -> None: 
         for m in self.__displays:
@@ -53,6 +52,7 @@ class MainLoop:
 
         for d in self.__displays: 
             d.render(self.__canvas)
+            d.render_children(self.__canvas)
 
     def start(self) -> None: 
         self.__running = True

@@ -9,13 +9,20 @@ class Display:
 
     @abstractmethod
     def update(self, dt: float) -> None:
-        for c in getattr(self, "children", []):
-            c.update(dt)
+        pass
         
     @abstractmethod
     def render(self, canvas: Canvas) -> None:
+        pass
+
+    def render_children(self, canvas: Canvas): 
         for c in getattr(self, "children", []):
             c.render(canvas)
+
+    def update_children(self, dt: float): 
+        for c in getattr(self, "children", []):
+            c.update(dt)
+
 
     def get_tag(self) -> str:
         return self.tag

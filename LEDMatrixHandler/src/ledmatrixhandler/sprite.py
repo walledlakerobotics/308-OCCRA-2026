@@ -1,4 +1,4 @@
-from ledmatrix import Canvas
+
 from .display import Display
 from PIL import Image
 import json
@@ -59,7 +59,7 @@ class Sprite(Display):
 
                 pixel = self.__img.getpixel((x + sprite_offx, y + sprite_offy))
 
-                if pixel is None or pixel == (0, 0, 0):
+                if pixel is None or (isinstance(pixel, tuple) and len(pixel) == 4 and pixel[3] == 0):
                     continue
 
                 canvas.set_pixel(
@@ -67,6 +67,10 @@ class Sprite(Display):
                     offy,
                     pixel,
                 )
+
+
+                print(canvas.get_pixel(offx, offy))
+                
 
     def set_animation(self, animation: str): 
         self.__current_animation = animation

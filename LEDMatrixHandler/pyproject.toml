@@ -3,15 +3,13 @@ name = "ledmatrixhandler"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "whiteswordv", email = "sodalush@gmail.com" }
-]
-requires-python = ">=3.14"
+authors = [{ name = "whiteswordv", email = "sodalush@gmail.com" }]
+requires-python = ">=3.14.8"
 dependencies = [
-    "ledmatrix>=0.1.0",
     "numpy>=2.5.4",
     "pillow>=13.0.0",
     "pynetworktables>=2021.0.0",
+    "pyside6>=6.12.0",
 ]
 
 [project.scripts]
