@@ -1,12 +1,17 @@
 from .main_loop import MainLoop
-from .sprite import Sprite
-from .sprite_vector import Vec2
+from .sprite import Sprite, Animation
+
 
 def main() -> None:
-    loop = MainLoop(30)
+    loop = MainLoop(30, 64, 32)
 
-    sprite = Sprite("assets/eye_source-Sheet.png", True)
+    loop.add(lambda : create_thing())
 
-    loop.add(sprite)
-    
     loop.start()
+
+def create_thing(): 
+    sprite = Sprite("assets/eye_source-Sheet.png", True)
+    animation = Animation(sprite)
+
+
+    return [sprite, animation]

@@ -9,7 +9,6 @@ class Display:
     tag: str = str(uuid.uuid4())
     z_index: int = 0
 
-
     def __init__(self, tag: Optional[str]) -> None:
         if tag != None: 
             self.tag = tag
