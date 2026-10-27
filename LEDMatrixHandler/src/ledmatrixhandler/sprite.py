@@ -91,15 +91,21 @@ class Sprite(Display):
         frame_data = []
 
         for n in range(frame_from, frame_to): 
-            frame = frames[f"{frame_name} {n}"]
 
-            print(frame)
+            current_frame_name = frame_name + " " + str(n)
 
-            # x = frame["x"]
-            # y = frame["y"]
-            # w = frame["w"]
-            # h = frame["h"]
+            try: 
+                frame = frames[current_frame_name]
 
-            # frame_data.append((x, y, w, h))
+                f = frame["frame"]
+                
+                x = f["x"]
+                y = f["y"]
+                w = f["w"]
+                h = f["h"]
+    
+                frame_data.append((x, y, w, h))
+            except: 
+                print("error loading frame: ", current_frame_name)
 
         return frame_data
