@@ -40,6 +40,7 @@ class MainLoop:
         if self.__device.is_open:
             self.__device.show_frame(self.__canvas)
 
+
     def __sim_render(self) -> None:
         self.__process_render()
 
@@ -48,7 +49,7 @@ class MainLoop:
     def __process_render(self) -> None: 
         self.__canvas.clear()
 
-        self.__displays.sort(key=lambda a : a.z_index)
+        # self.__displays.sort(key=lambda a : a.get_z_index())
 
         for d in self.__displays: 
             d.render(self.__canvas)

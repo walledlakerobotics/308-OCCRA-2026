@@ -41,8 +41,7 @@ class Sprite(Display):
     def render(self, canvas: Canvas) -> None:
 
         self.__offset_sprite_data = self.__offset_data_producer()
-        print(self.__offset_sprite_data)
-
+        
         sprite_offx = self.__offset_sprite_data[0]
         sprite_offy = self.__offset_sprite_data[1]
 
@@ -128,15 +127,13 @@ class Animation(Display):
     def __init__(self, sprite: Sprite) -> None:
         self.sprite = sprite
         self.__offset_sprite_data_arr = sprite.parse_offset_data()
-        
+
         if not self.__offset_sprite_data_arr:
             raise ValueError("Sprite animation has no frames")
 
         self.current_frame = 0
         self.playing = True
         self.__set_current_frame()
-
-        self.z_index = sprite.z_index + 1
 
     def __set_current_frame(self) -> None:
         self.__current_offset = self.__offset_sprite_data_arr[self.current_frame]
