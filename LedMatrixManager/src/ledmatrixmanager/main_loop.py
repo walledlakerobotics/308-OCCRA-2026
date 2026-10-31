@@ -28,7 +28,7 @@ class MainLoop:
             self.__options.parallel = 1
             self.__options.gpio_slowdown = 4
 
-            self.__led_matrix = RGBMatrix(self.__options)
+            self.__led_matrix = RGBMatrix(options=self.__options)
             self.__canvas = self.__led_matrix.CreateFrameCanvas()
         except:
             print("instance error")
