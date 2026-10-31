@@ -8,6 +8,8 @@ import time
 class MainLoop:
 
     def __init__(self, fps: float, width: int, height: int): 
+            self.__running = False
+            self.__last_time = 0.0
             self.__frame_per_second = fps
             
             self.__displays: list[Display] = list()
@@ -46,12 +48,12 @@ class MainLoop:
             elapsed_time: float = time.perf_counter() - start_time
             remaining_time: float = target_frame_time - elapsed_time
 
-            if remaining_time < self.__frame_per_second and not remaining_time < 0:
+            if remaining_time > 0:
                 time.sleep(remaining_time)
 
-
-    def start(self): 
+    def start(self):
         self.__running = True
+        self.__last_time = time.perf_counter()
 
         self.__loop()
 

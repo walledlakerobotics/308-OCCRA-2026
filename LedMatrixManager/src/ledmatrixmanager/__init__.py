@@ -5,7 +5,7 @@ from .display import Display
 
 def main() -> None:
 
-    loop = MainLoop(30, 64, 32)
+    loop = MainLoop(12, 64, 32)
 
     sprite = Sprite("assets/eye_source-Sheet.png", True)
     ani = Animation(sprite)

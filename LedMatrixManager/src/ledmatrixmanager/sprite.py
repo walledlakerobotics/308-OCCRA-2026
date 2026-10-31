@@ -64,8 +64,8 @@ class Sprite(Display):
                 if pixel is None:
                     continue
 
-                if pixel is tuple[int, int, int]: 
-                    canvas.SetPixel(offx, offy, pixel[0], pixel[1], pixel[2])
+                # idk why this is erroring this is working
+                canvas.SetPixel(offx, offy, pixel[0], pixel[1], pixel[2])
 
     def set_animation(self, animation: str): 
         self.__current_animation = animation
