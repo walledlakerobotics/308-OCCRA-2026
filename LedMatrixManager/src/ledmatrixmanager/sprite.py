@@ -1,3 +1,8 @@
+try:
+    from rgbmatrix import FrameCanvas as Canvas
+except:
+    from RGBMatrixEmulator.emulation.canvas import Canvas
+
 from .display import Display
 from PIL import Image
 import json
@@ -5,7 +10,6 @@ import json
 from typing import Callable
 
 import math
-# from .sprite_vector import Vec2
 
 class Sprite(Display):
     __current_animation: str = "idle"
@@ -37,10 +41,10 @@ class Sprite(Display):
                 print("cannot load json data: ", json_path)
 
     # needs to add Anti-aliasing
-    def render(self, canvas) -> None:
+    def render(self, canvas: Canvas) -> None:
 
         self.__offset_sprite_data = self.__offset_data_producer()
-        
+
         sprite_offx = self.__offset_sprite_data[0]
         sprite_offy = self.__offset_sprite_data[1]
 
@@ -60,7 +64,8 @@ class Sprite(Display):
                 if pixel is None:
                     continue
 
-                canvas.SetPixel(offx, offy, pixel[0], pixel[1], pixel[2])                
+                if pixel is tuple[int, int, int]: 
+                    canvas.SetPixel(offx, offy, pixel[0], pixel[1], pixel[2])
 
     def set_animation(self, animation: str): 
         self.__current_animation = animation
@@ -70,7 +75,6 @@ class Sprite(Display):
 
     def set_offset_data(self, data: Callable[[], tuple[int, int, int, int]]):
         self.__offset_data_producer = data
-
 
     def parse_offset_data(self) -> list[tuple[int, int, int, int]]:
         frame_name = self.__file_dir.removeprefix("assets/")

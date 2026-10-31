@@ -1,3 +1,8 @@
+try: 
+    from rgbmatrix import FrameCanvas as Canvas
+except: 
+    from RGBMatrixEmulator.emulation.canvas import Canvas
+
 from abc import abstractmethod
 import uuid
 
@@ -11,7 +16,7 @@ class Display:
         pass
         
     @abstractmethod
-    def render(self, canvas) -> None:
+    def render(self, canvas: Canvas) -> None:
         pass
 
     def get_tag(self) -> str:
