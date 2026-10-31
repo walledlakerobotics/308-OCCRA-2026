@@ -1,5 +1,5 @@
 try: 
-    from rgbmatrix import FrameCanvas as Canvas
+    from rgbmatrix import FrameCanvas as Canvas  # type: ignore
 except: 
     from RGBMatrixEmulator.emulation.canvas import Canvas
 
@@ -16,7 +16,7 @@ class Display:
         pass
         
     @abstractmethod
-    def render(self, canvas: Canvas) -> None:
+    def draw(self, canvas: Canvas) -> None:
         pass
 
     def get_tag(self) -> str:
