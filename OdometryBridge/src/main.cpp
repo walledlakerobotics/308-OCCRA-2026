@@ -11,10 +11,7 @@ void setup()
   // port
   Serial.begin(115200);
 
-  Wire.setClock(400000); // 400kHz I2C
-  Wire.setTimeout(10); // 10ms timeout for I2C operations
-
-  // configurating pinpoint
+  // configuring pinpoint
   pinpoint.begin();
 
   delay(2000);
@@ -73,7 +70,7 @@ void loop()
 
   Buffer buffer = create_frame(payload);
   size_t buffer_size = buffer.size();
-
+ 
   // sends data and waits for it to complete.
   Serial.write(buffer.data(), buffer_size);
 
@@ -82,9 +79,7 @@ void loop()
 
 void setup1()
 {
-  while (!Serial) {
-    delay(50);
-  }
+  delay(3000);
 
   SerialBuffer buffer = SerialBuffer(Serial);
 
@@ -97,7 +92,6 @@ void setup1()
       rp2040.fifo.push(reinterpret_cast<uint32_t>(data_ptr));
     }
 
-    yield();
     delay(10);
   }
 }
