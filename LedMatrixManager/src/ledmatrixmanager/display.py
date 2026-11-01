@@ -6,10 +6,17 @@ except:
 from abc import abstractmethod
 import uuid
 
+from networktables import NetworkTablesInstance
+
+
 class Display: 
 
     def __init__(self) -> None:
         self.tag: str = str(uuid.uuid4())
+
+    @abstractmethod
+    def start(self, nt_inst: NetworkTablesInstance):
+        pass 
 
     @abstractmethod
     def update(self, dt: float) -> None:

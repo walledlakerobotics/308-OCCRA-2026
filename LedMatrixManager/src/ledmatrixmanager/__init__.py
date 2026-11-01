@@ -3,6 +3,8 @@ try:
 except: 
     from RGBMatrixEmulator.emulation.canvas import Canvas
 
+from networktables import NetworkTablesInstance
+
 from .main_loop import MainLoop
 from .sprite import Sprite, Animation 
 from .display import Display
@@ -31,6 +33,9 @@ class Spin(Display):
     def __init__(self) -> None:
 
         self.theata = 0
+
+    def start(self, nt_inst: NetworkTablesInstance):
+        pass
 
     def update(self, dt: float) -> None:
         pass

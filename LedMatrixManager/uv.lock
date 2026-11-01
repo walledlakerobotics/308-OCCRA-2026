@@ -7,12 +7,14 @@ name = "ledmatrixmanager"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pynetworktables" },
     { name = "rgbmatrix", marker = "platform_machine in 'aarch64 armv7l armv6l' and sys_platform == 'linux'" },
     { name = "rgbmatrixemulator" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "pynetworktables", specifier = ">=2021.0.0" },
     { name = "rgbmatrix", marker = "platform_machine in 'aarch64 armv7l armv6l' and sys_platform == 'linux'", git = "https://github.com/hzeller/rpi-rgb-led-matrix" },
     { name = "rgbmatrixemulator", specifier = ">=0.20.0" },
 ]
@@ -139,6 +141,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fc/96/d6b82e8b8c06ad143b66b12e0b31051e4bf489b4fabca1f390a14fe1ebde/pillow-13.0.0-cp315-cp315t-win32.whl", hash = "sha256:c50c80e3591e5cf9a8dfa6007d4f10732f02e32263850999286e56ccd650cfb2", size = 6517200, upload-time = "2026-10-16T22:17:42.886Z" },
     { url = "https://files.pythonhosted.org/packages/60/d4/0062e6005e9b270b165015aafd343364ac378ec5a685431ea42baad33357/pillow-13.0.0-cp315-cp315t-win_amd64.whl", hash = "sha256:adb3c2124c68e480f4632d06cb7caa3b48a51678475f483b4edb1c6dee29ea43", size = 7287488, upload-time = "2026-10-16T22:17:45.56Z" },
     { url = "https://files.pythonhosted.org/packages/e4/81/b8eb349746be7bce47dd95337c6634e84910af91b59aaa9159c034c614fa/pillow-13.0.0-cp315-cp315t-win_arm64.whl", hash = "sha256:4a25756244bdcce3b50580baadf320fa48297f0eeb8e114ba64139a40d4d0fc8", size = 2698073, upload-time = "2026-10-16T22:17:47.556Z" },
+]
+
+[[package]]
+name = "pynetworktables"
+version = "2021.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/a9/fa585189c6cb45f59e90790ffa5737727075b65d516c8fa0c17c1661c16a/pynetworktables-2021.0.0.tar.gz", hash = "sha256:91167948e66c29d5c90f85f3e249403f4d2ebf11368b93f9b968ef315388c73c", size = 83875, upload-time = "2021-01-20T09:36:17.774Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/1f/048457f674901be38a4ae377ca0166bf63497bf458fa500c84a202829623/pynetworktables-2021.0.0-py3-none-any.whl", hash = "sha256:54604b1993515c43890be058263f158c1d168c69bedd802f0de644964cf3840d", size = 65720, upload-time = "2021-01-20T09:36:16.317Z" },
 ]
 
 [[package]]

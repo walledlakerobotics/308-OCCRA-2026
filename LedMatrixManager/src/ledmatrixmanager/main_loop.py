@@ -8,6 +8,8 @@ except ImportError:
 from .display import Display
 import time
 
+from networktables import NetworkTablesInstance
+
 
 class MainLoop:
     def __init__(self, fps: float, width: int, height: int, brightness: int):
@@ -32,6 +34,20 @@ class MainLoop:
             self.__canvas = self.__led_matrix.CreateFrameCanvas()
         except:
             print("instance error")
+
+
+        try: 
+            self.__inst = NetworkTablesInstance.getDefault()
+
+            self.__inst.setServerTeam(308)
+            self.__inst.startClient("LEDMatrix")
+
+            for d in self.__displays:
+                d.start(self.__inst)
+
+        except: 
+            print("ntcore failed")
+        
 
     def __update(self, dt: float) -> None:
         for m in self.__displays:

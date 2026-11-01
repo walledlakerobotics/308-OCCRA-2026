@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "rgbmatrixemulator>=0.20.0",
     "rgbmatrix @ git+https://github.com/hzeller/rpi-rgb-led-matrix ; sys_platform == 'linux' and platform_machine in 'aarch64 armv7l armv6l'",
+    "pynetworktables>=2021.0.0",
 ]
 
 [project.scripts]
