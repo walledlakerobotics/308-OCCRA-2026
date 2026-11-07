@@ -1,5 +1,5 @@
 try:
-    from rgbmatrix import FrameCanvas as Canvas
+    from rgbmatrix import FrameCanvas as Canvas  # type: ignore
 except:
     from RGBMatrixEmulator.emulation.canvas import Canvas
 
@@ -41,7 +41,7 @@ class Sprite(Display):
                 print("cannot load json data: ", json_path)
 
     # needs to add Anti-aliasing
-    def render(self, canvas: Canvas) -> None:
+    def draw(self, canvas: Canvas) -> None:
 
         self.__offset_sprite_data = self.__offset_data_producer()
 
@@ -63,8 +63,8 @@ class Sprite(Display):
 
                 if pixel is None:
                     continue
-
                 # idk why this is erroring this is working
+
                 canvas.SetPixel(offx, offy, pixel[0], pixel[1], pixel[2])
 
     def set_animation(self, animation: str): 

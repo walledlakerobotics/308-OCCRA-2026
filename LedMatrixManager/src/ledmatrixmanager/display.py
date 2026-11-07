@@ -1,10 +1,13 @@
 try: 
-    from rgbmatrix import FrameCanvas as Canvas
+    from rgbmatrix import FrameCanvas as Canvas  # type: ignore
 except: 
     from RGBMatrixEmulator.emulation.canvas import Canvas
 
 from abc import abstractmethod
 import uuid
+
+from networktables import NetworkTablesInstance
+
 
 class Display: 
 
@@ -12,11 +15,15 @@ class Display:
         self.tag: str = str(uuid.uuid4())
 
     @abstractmethod
+    def start(self, nt_inst: NetworkTablesInstance):
+        pass 
+
+    @abstractmethod
     def update(self, dt: float) -> None:
         pass
         
     @abstractmethod
-    def render(self, canvas: Canvas) -> None:
+    def draw(self, canvas: Canvas) -> None:
         pass
 
     def get_tag(self) -> str:
