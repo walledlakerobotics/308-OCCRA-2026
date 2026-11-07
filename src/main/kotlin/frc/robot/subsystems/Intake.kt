@@ -20,17 +20,20 @@ class Intake : SubsystemBase(), AutoCloseable {
         intakeMotor.configurator.apply(kIntakeerConfig)
     }
 
-    fun motorIntake(velocity: AngularVelocity) {
-        intakeMotor.setControl(request.withVelocity(velocity))
+    fun motorIntake(voltage: Double) {
+        intakeMotor.setVoltage(voltage)
     }
 
-    fun motorIntake(velocity: Double) {
-        intakeMotor.setVoltage(velocity)
-    }
-
-    val intake: Command
+    val run: Command
         get() = startEnd({
             motorIntake(4.0)
+        }, {
+            motorIntake(0.0)
+        })
+
+    val runSlowly: Command
+        get() = startEnd({
+            motorIntake(2.0)
         }, {
             motorIntake(0.0)
         })

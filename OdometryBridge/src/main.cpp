@@ -19,34 +19,34 @@ void setup()
 
 void loop()
 {
-  while (rp2040.fifo.available()) {
-    reset_data* data_ptr = reinterpret_cast<reset_data*>(rp2040.fifo.pop());
-
-    if (data_ptr->calibrate_imu) {
-      pinpoint.recalibrateIMU();
-    }
-
-    if (data_ptr->set_position) {
-      pinpoint.setPosition(goBILDA::Pose2D(data_ptr->position_x, data_ptr->position_y, data_ptr->position_heading));
-    }
-
-    if (data_ptr->set_offsets) {
-      pinpoint.setOffsets(data_ptr->offset_x, data_ptr->offset_y);
-    }
-
-    if (data_ptr->set_directions) {
-      pinpoint.setEncoderDirections(
-        data_ptr->x_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward,
-        data_ptr->y_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward
-      );
-    }
-
-    if (data_ptr->set_resolution) {
-      pinpoint.setEncoderResolution(data_ptr->resolution);
-    }
-
-    delete data_ptr;
-  }
+  // while (rp2040.fifo.available()) {
+  //   reset_data* data_ptr = reinterpret_cast<reset_data*>(rp2040.fifo.pop());
+  //
+  //   if (data_ptr->calibrate_imu) {
+  //     pinpoint.recalibrateIMU();
+  //   }
+  //
+  //   if (data_ptr->set_position) {
+  //     pinpoint.setPosition(goBILDA::Pose2D(data_ptr->position_x, data_ptr->position_y, data_ptr->position_heading));
+  //   }
+  //
+  //   if (data_ptr->set_offsets) {
+  //     pinpoint.setOffsets(data_ptr->offset_x, data_ptr->offset_y);
+  //   }
+  //
+  //   if (data_ptr->set_directions) {
+  //     pinpoint.setEncoderDirections(
+  //       data_ptr->x_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward,
+  //       data_ptr->y_inverted ? goBILDA::EncoderDirection::Backward : goBILDA::EncoderDirection::Forward
+  //     );
+  //   }
+  //
+  //   if (data_ptr->set_resolution) {
+  //     pinpoint.setEncoderResolution(data_ptr->resolution);
+  //   }
+  //
+  //   delete data_ptr;
+  // }
 
   goBILDA::BulkReadData bulk_data = pinpoint.bulkRead();
 
@@ -89,7 +89,7 @@ void setup1()
     if (read_frame(buffer, payload)) {
       reset_data* data_ptr = new reset_data(reset_data::from_bytes(payload));
 
-      rp2040.fifo.push(reinterpret_cast<uint32_t>(data_ptr));
+      // rp2040.fifo.push(reinterpret_cast<uint32_t>(data_ptr));
     }
 
     delay(10);

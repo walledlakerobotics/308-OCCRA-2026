@@ -2,19 +2,17 @@
 
 #include <vector>
 #include <cstdint>
-#include <cstring>
 #include <stdexcept>
 
 #include <Arduino.h>
 
 class Buffer
 {
-    private:
-        std::vector<uint8_t> buffer;
-        size_t reading_cursor = 0;
-        size_t writing_cursor = 0;
+    std::vector<uint8_t> buffer;
+    size_t reading_cursor = 0;
+    size_t writing_cursor = 0;
 
-        size_t marked_reading_cursor = 0;
+    size_t marked_reading_cursor = 0;
 
     public:
         Buffer(size_t initial_size = 0) : buffer(initial_size) {}
@@ -45,12 +43,12 @@ class Buffer
             return data;
         }
 
-        inline void reserve(size_t capacity)
+        void reserve(size_t capacity)
         {
             buffer.resize(writing_cursor + capacity);
         }
 
-        inline void clear()
+        void clear()
         {
             buffer.erase(buffer.begin(), buffer.begin() + reading_cursor);
 
@@ -58,22 +56,22 @@ class Buffer
             writing_cursor -= reading_cursor;
         }
 
-        inline size_t size() const
+        size_t size() const
         {
             return writing_cursor - reading_cursor;
         }
 
-        inline bool empty() const
+        bool empty() const
         {
             return size() == 0;
         }
 
-        inline const uint8_t *data() const
+        const uint8_t *data() const
         {
             return &buffer[reading_cursor];
         }
 
-        inline uint8_t *write_ptr(size_t size)
+        uint8_t *write_ptr(size_t size)
         {
             reserve(size);
 
@@ -84,18 +82,18 @@ class Buffer
             return dest;
         }
 
-        inline void mark()
+        void mark()
         {
             marked_reading_cursor = reading_cursor;
         }
 
-        inline void reset()
+        void reset()
         {
             reading_cursor = marked_reading_cursor;
         }
 
         template <typename T>
-        inline static Buffer from_data(const T &data)
+        static Buffer from_data(const T &data)
         {
             Buffer buffer(sizeof(T));
             buffer.push(data);

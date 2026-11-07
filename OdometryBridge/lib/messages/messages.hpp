@@ -24,12 +24,12 @@ struct p_data
     float velocity_y = 0.0;
     float velocity_heading = 0.0;
 
-    inline constexpr size_t size() const
+    constexpr size_t size() const
     {
         return sizeof(uint32_t) * 2 + sizeof(float) * 10;
     }
 
-    inline Buffer to_bytes() const
+    Buffer to_bytes() const
     {
         Buffer bytes(size());
 
@@ -49,7 +49,7 @@ struct p_data
         return bytes;
     }
 
-    inline static p_data from_bytes(Buffer &buffer)
+    static p_data from_bytes(Buffer &buffer)
     {
         p_data data;
 
@@ -94,12 +94,12 @@ struct reset_data
     bool set_resolution = false;
     float resolution = 0.0;
 
-    inline constexpr size_t size() const
+    constexpr size_t size() const
     {
         return sizeof(bool) * 2 + sizeof(float) * 3 + sizeof(bool) + sizeof(float) * 2 + sizeof(bool) * 4 + sizeof(float);
     }
 
-    inline Buffer to_bytes() const
+    Buffer to_bytes() const
     {
         Buffer bytes(size());
 
@@ -124,7 +124,7 @@ struct reset_data
         return bytes;
     }
 
-    inline static reset_data from_bytes(Buffer &buffer)
+    static reset_data from_bytes(Buffer &buffer)
     {
         reset_data data;
 

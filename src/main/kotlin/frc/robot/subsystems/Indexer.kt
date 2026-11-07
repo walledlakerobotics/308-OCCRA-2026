@@ -29,7 +29,7 @@ class Indexer : SubsystemBase(), AutoCloseable {
         rightMotor.configure(kRightIndexerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
     }
 
-    val indexer: Command
+    val run: Command
         get() = startEnd({
             leftMotor.set(0.5)
             rightMotor.set(0.5)
@@ -38,16 +38,16 @@ class Indexer : SubsystemBase(), AutoCloseable {
             rightMotor.set(0.0)
         })
 
-    val indexerFast: Command
+    val runSlowly: Command
         get() = startEnd({
-            leftMotor.set(1.0)
-            rightMotor.set(1.0)
+            leftMotor.set(0.3)
+            rightMotor.set(0.3)
         }, {
             leftMotor.set(0.0)
             rightMotor.set(0.0)
         })
 
-    val indexerReverse: Command
+    val reverse: Command
         get() = startEnd({
             leftMotor.set(-0.5)
             rightMotor.set(-0.5)

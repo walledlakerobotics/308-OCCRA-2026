@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 const val kShootCANID = 24
 
 // rotatons/s 
-const val kShootingVelocity = 100.0
+const val kShootingVelocity = 58.0
 
 val kShooterConfig: TalonFXConfiguration 
     get() = TalonFXConfiguration()
@@ -24,7 +24,7 @@ val kShooterConfig: TalonFXConfiguration
         )
         .withSlot0(
             Slot0Configs()
-                .withKP(0.1)
+                .withKP(0.085)
                 .withKI(0.0)
                 .withKD(0.0)
                 .withKS(0.18)

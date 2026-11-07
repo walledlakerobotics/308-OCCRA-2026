@@ -26,8 +26,7 @@ private fun Sink.writeBoolean(value: Boolean) {
 @Logged
 class Pinpoint(val port: SerialPort.Port) : AutoCloseable {
     // port serial instance
-    private var serialPort =
-        SerialPort(115200, port)
+    private var serialPort = SerialPort(115200, port)
 
     private var serialPortSim = if (RobotBase.isSimulation()) {
         com.fazecast.jSerialComm.SerialPort.getCommPorts().firstOrNull {
@@ -70,7 +69,7 @@ class Pinpoint(val port: SerialPort.Port) : AutoCloseable {
         }
     }.iterator()
 
-    // updates in seprate thread in different intervals
+    // updates in separate thread in different intervals
     private val notifier = Notifier {
         if (!isRunning.compareAndSet(false, true)) {
             return@Notifier
@@ -78,13 +77,16 @@ class Pinpoint(val port: SerialPort.Port) : AutoCloseable {
 
         if (RobotBase.isReal()) {
             if (serialPort.bytesReceived == 0) {
-                connected = false
-
                 repeatedZeroBytes++
 
                 if (repeatedZeroBytes > 100) {
+                    repeatedZeroBytes = 0
+                    
+                    connected = false
+                    
                     serialPort.close()
 
+                    
                     serialPort = SerialPort(115200, port)
                 }
 
@@ -94,32 +96,47 @@ class Pinpoint(val port: SerialPort.Port) : AutoCloseable {
 
             connected = true
             repeatedZeroBytes = 0
+            
+            val bytes = serialPort.read(serialPort.bytesReceived)
 
-            buffer.write(serialPort.read(serialPort.bytesReceived))
+            buffer.write(bytes)
         } else {
-            serialPortSim?.let { simPort ->
-                try {
-                    val bytes = ByteArray(simPort.bytesAvailable())
+            try {
+                val bytes = ByteArray(serialPortSim!!.bytesAvailable())
 
-                    simPort.readBytes(bytes, bytes.size)
+                serialPortSim!!.readBytes(bytes, bytes.size)
 
-                    buffer.write(bytes)
+                buffer.write(bytes)
+                
+                repeatedZeroBytes = 0
+                connected = true
+            } catch (_: Exception) {
+                repeatedZeroBytes++
+                
+                if (repeatedZeroBytes > 100 || connected) {
+                    repeatedZeroBytes = 0
                     
-                    connected = true
-                } catch (_: Exception) {
-                    connected = false
-                    
-                    simPort.closePort()
+                    serialPortSim?.closePort()
 
                     serialPortSim = com.fazecast.jSerialComm.SerialPort.getCommPorts().firstOrNull {
                         it.vendorID == 0x2E8A && it.productID == 0xF00F
                     }
+                    
+                    if (serialPortSim != null) {
+                        println("Reconnected to Pinpoint Simulator")
+                    } else {
+                        println("Failed to reconnect to Pinpoint Simulator")
+                    }
+                    
+
 
                     serialPortSim?.openPort()
-
-                    isRunning.set(false)
-                    return@Notifier
                 }
+
+                connected = false
+
+                isRunning.set(false)
+                return@Notifier
             }
         }
 

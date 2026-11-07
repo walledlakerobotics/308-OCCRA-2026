@@ -27,14 +27,14 @@ class Robot : TimedRobot() {
         DataLogManager.start()
         DriverStation.startDataLog(DataLogManager.getLog())
 
+        DriverStation.silenceJoystickConnectionWarning(true)
+
         Epilogue.bind(this)
-        
-        if (isSimulation()) {
-            DriverStation.silenceJoystickConnectionWarning(true)
-        }
     }
 
     override fun robotPeriodic() {
+        robotContainer.vision.update()
+
         CommandScheduler.getInstance().run()
     }
 

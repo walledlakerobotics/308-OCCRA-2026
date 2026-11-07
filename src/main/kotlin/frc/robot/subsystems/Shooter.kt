@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.constants.kShootCANID
 import frc.robot.constants.kShooterConfig
 import frc.robot.constants.kShootingVelocity
+import kotlin.math.absoluteValue
 
 @Logged
 class Shooter : SubsystemBase(), AutoCloseable {
@@ -23,7 +24,7 @@ class Shooter : SubsystemBase(), AutoCloseable {
     init {
         shooterMotor.configurator.apply(kShooterConfig)
 
-        SmartDashboard.putNumber("Shooter/ShootingVelocity", 62.0)
+        SmartDashboard.putNumber("Shooter/ShootingVelocity", kShootingVelocity)
     }
 
     fun shoot(velocity: Double) {
@@ -32,7 +33,7 @@ class Shooter : SubsystemBase(), AutoCloseable {
 
     val shoot: Command
         get() = startEnd({
-            shoot(SmartDashboard.getNumber("Shooter/ShootingVelocity", 100.0))
+            shoot(SmartDashboard.getNumber("Shooter/ShootingVelocity", kShootingVelocity))
         }, {
             stop()
         })
@@ -75,7 +76,10 @@ class Shooter : SubsystemBase(), AutoCloseable {
         get() = sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse)
         
     val atGoal: Boolean
-        get() = shooterMotor.velocity.valueAsDouble >= SmartDashboard.getNumber("Shooter/ShootingVelocity", 62.0) * 0.95
+        get() =
+            shooterMotor.velocity.valueAsDouble >=
+                    SmartDashboard.getNumber("Shooter/ShootingVelocity", kShootingVelocity) * 0.97
+        
 
     override fun close() {
         shooterMotor.close()

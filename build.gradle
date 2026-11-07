@@ -19,8 +19,8 @@ kotlin {
     sourceSets {
         main {
             kotlin.srcDirs += [
-                file("build/generated/source/kapt/main"),
-                file("build/generated/source/kaptKotlin/main")
+                file("${buildDir}/generated/source/kapt/main"),
+                file("${buildDir}/generated/source/kaptKotlin/main")
             ]
         }
     }

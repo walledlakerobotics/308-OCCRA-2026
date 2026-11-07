@@ -6,10 +6,11 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Millimeters
 import frc.robot.subsystems.drivetrain.EncoderDirection
+import kotlin.math.PI
 
 // meters/second
-const val kTranslationFactor = 5
-const val kRotationFactor = 7
+const val kTranslationFactor = 3
+const val kRotationFactor = 5
 
 const val kFrontLeftMotorCANID = 2
 const val kFrontRightMotorCANID = 4
@@ -21,6 +22,10 @@ val kFrontRightNeoTranslation = Translation2d(Units.inchesToMeters(10.0), Units.
 val kBackLeftNeoTranslation = Translation2d(Units.inchesToMeters(-10.0), Units.inchesToMeters(11.75))
 val kBackRightNeoTranslation = Translation2d(Units.inchesToMeters(-10.0), Units.inchesToMeters(-11.75))
 
+private val kWheelCircumference = PI * Units.inchesToMeters(6.0)
+private const val kGearReduction = 8.45865
+
+private val kRotationsToMeters = kWheelCircumference / kGearReduction
 
 private val kSparkMaxConfig: SparkBaseConfig
     get() {
@@ -28,19 +33,19 @@ private val kSparkMaxConfig: SparkBaseConfig
 
         // pid control
         config.closedLoop
-            .pid(0.25, 0.0, 0.1)
+            .pid(0.1, 0.0, 0.0)
             .maxOutput(1.0) // the max duty cycle coming from PID
+            .feedForward
+            .kV(12.0 / (5676.0 * kRotationsToMeters / 60.0))
 
         config
             .idleMode(SparkBaseConfig.IdleMode.kCoast)
             .smartCurrentLimit(45) // amps
             .voltageCompensation(12.0) // volts
 
-        val c = Math.PI * Units.inchesToMeters(6.0)
-
         config.encoder
-            .positionConversionFactor(c / 8.45865)
-            .velocityConversionFactor(c / 8.45865 / 60.0)
+            .positionConversionFactor(kRotationsToMeters)
+            .velocityConversionFactor(kRotationsToMeters / 60.0)
 
         return config
     }
@@ -52,15 +57,15 @@ val kRightConfig: SparkBaseConfig
     get() = kSparkMaxConfig.inverted(true)
     
 // Odometry pods
-const val kWheelDiameter = 38 // mm
-const val kWheelCircumference = kWheelDiameter * Math.PI // mm
+const val kPodWheelDiameter = 38 // mm
+const val kPodWheelCircumference = kPodWheelDiameter * Math.PI // mm
 
 const val kTicksPerRevolution = 4096
 
-const val kTicksPerMM = kTicksPerRevolution / kWheelCircumference
+const val kTicksPerMM = kTicksPerRevolution / kPodWheelCircumference
 
-val kOffsetX = Millimeters.of(0.0)!!
-val kOffsetY = Millimeters.of(0.0)!!
+val kOffsetX = Millimeters.of(275.0)!!
+val kOffsetY = Millimeters.of(68.0)!!
 
 val kXEncoderDirection = EncoderDirection.BACKWARD
 val kYEncoderDirection = EncoderDirection.FORWARD
