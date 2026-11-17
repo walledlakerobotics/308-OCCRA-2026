@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '2.4.20'
-    id 'org.jetbrains.kotlin.kapt' version '2.4.20'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.21'
+    id 'org.jetbrains.kotlin.kapt' version '2.4.21'
     id 'edu.wpi.first.GradleRIO' version '2026.2.1'
 }
 
@@ -73,6 +73,7 @@ repositories {
 // Also defines JUnit 5.
 dependencies {
     kapt wpi.java.deps.wpilibAnnotations()
+    annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
@@ -98,6 +99,10 @@ dependencies {
     implementation 'com.fazecast:jSerialComm:[2.0.0,3.0.0)'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-io-core:0.9.1'
+
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+
+    implementation project(':PinpointRIO')
 }
 
 test {
