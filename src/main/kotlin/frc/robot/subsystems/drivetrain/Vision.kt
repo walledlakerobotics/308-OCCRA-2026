@@ -5,8 +5,10 @@ import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.Nat
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.util.Units
+import frc.robot.constants.robotToCamera
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonUtils
 import org.photonvision.targeting.PhotonPipelineResult
@@ -28,32 +30,44 @@ class Vision : AutoCloseable {
     val cy
         get() = cameraMatrix[1, 2]
 
-    var results = emptyList<PhotonPipelineResult>()
+    var latestResult: PhotonPipelineResult? = null
         private set
 
-    val latestResult
-        get() = results.lastOrNull()
-
-    val bestTarget
-        get() = if (latestResult?.hasTargets() ?: false) latestResult?.bestTarget else null
-
-    val bestTargetPose: Translation2d?
-        get() {
-            val target = bestTarget ?: return null
-
-            return PhotonUtils.estimateCameraToTargetTranslation(
+    fun getBallPositions(robotPose: Pose2d) = buildList {
+        for (target in latestResult?.targets ?: emptyList()) {
+            val translation = PhotonUtils.estimateCameraToTargetTranslation(
                 PhotonUtils.calculateDistanceToTargetMeters(
-                    0.0,
-                    9.5/2,
-                    0.0,
+                    robotToCamera.z,
+                    Units.inchesToMeters(9.5 / 2),
+                    Units.degreesToRadians(-10.0),
                     Units.degreesToRadians(target.pitch)
                 ),
                 Rotation2d.fromDegrees(target.yaw)
+            ) + robotToCamera.toTranslation2d()
+
+            val transform = Transform2d(
+                translation,
+                Rotation2d.kZero
             )
+
+            val position = robotPose + transform
+
+            add(position.translation)
         }
+    }
+
+    fun getClosestBallTo(robotPose: Pose2d, targetPose: Translation2d = robotPose.translation): Translation2d? {
+        val ballPositions = getBallPositions(robotPose)
+
+        return ballPositions.minByOrNull { it.getSquaredDistance(targetPose) }
+    }
+
+    fun getClosestBallTo(robotPose: Pose2d, targetPose: Translation2d?) =
+        if (targetPose != null) getClosestBallTo(robotPose, targetPose) else getClosestBallTo(robotPose)
 
     fun update() {
-        results = camera.allUnreadResults
+        latestResult = camera.allUnreadResults.lastOrNull() ?:
+            if (camera.isConnected) latestResult else null
     }
 
     override fun close() {
