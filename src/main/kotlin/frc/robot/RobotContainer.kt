@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.Autos
+import frc.robot.commands.alignToBall
 import frc.robot.commands.alignToHeading
-import frc.robot.commands.faceToward
 import frc.robot.commands.intake
 import frc.robot.commands.shoot
 import frc.robot.commands.stage
@@ -31,7 +31,7 @@ class RobotContainer : AutoCloseable {
     val indexer = Indexer()
     val shooter = Shooter()
 
-    val vision = Vision { drivetrain.position }
+    val vision = Vision()
 
     val autos = Autos(drivetrain, indexer, intake, shooter)
 
@@ -53,11 +53,10 @@ class RobotContainer : AutoCloseable {
         )
 
         driverController.rightBumper().whileTrue(
-            drivetrain.faceToward(
-                { vision.bestTargetPose },
+            drivetrain.alignToBall(
+                vision,
                 { -MathUtil.applyDeadband(driverController.leftY, kDeadBandThreshold) },
-                { -MathUtil.applyDeadband(driverController.leftX, kDeadBandThreshold) },
-                { -MathUtil.applyDeadband(driverController.rightX, kDeadBandThreshold) }
+                { -MathUtil.applyDeadband(driverController.leftX, kDeadBandThreshold) }
             )
         )
 
