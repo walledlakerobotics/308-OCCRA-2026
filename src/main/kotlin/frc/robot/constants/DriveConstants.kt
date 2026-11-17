@@ -3,9 +3,10 @@ package frc.robot.constants
 import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Millimeters
-import frc.robot.subsystems.drivetrain.EncoderDirection
+import org.walledlakerobotics.pinpointrio.EncoderDirection
 import kotlin.math.PI
 
 // meters/second
@@ -69,3 +70,6 @@ val kOffsetY = Millimeters.of(68.0)!!
 
 val kXEncoderDirection = EncoderDirection.BACKWARD
 val kYEncoderDirection = EncoderDirection.FORWARD
+
+// Vision
+val robotToCamera = Translation3d(0.0, 0.0, Units.feetToMeters(2.0))

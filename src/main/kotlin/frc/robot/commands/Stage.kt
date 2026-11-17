@@ -6,20 +6,22 @@ import frc.robot.subsystems.Indexer
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
 
-fun intake(intake: Intake, indexer: Indexer) = Commands.parallel(
+fun intake(intake: Intake, indexer: Indexer, shooter: Shooter) = Commands.parallel(
     intake.run,
-    indexer.run
+    indexer.run,
+    shooter.shootReverse
 )!!
 
 fun stage(indexer: Indexer, timeout: Double) = indexer.reverse.withTimeout(timeout)!!
 
 fun Indexer.runWhile(condition: () -> Boolean) =
     run.onlyWhile(condition)
-        .andThen(idle().withTimeout(0.5))
+        .andThen(reverse.withTimeout(0.5))
+        .andThen(reverse.until(condition))
         .repeatedly()!!
 
 fun shoot(indexer: Indexer, intake: Intake, shooter: Shooter) = Commands.parallel(
-    indexer.runWhile { shooter.atGoal },
-    intake.run,
+    indexer.runWhile { indexer.rightSensorTriggered },
+    intake.runFast,
     shooter.shoot
 )!!

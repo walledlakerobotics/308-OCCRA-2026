@@ -11,9 +11,11 @@ import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds
+import edu.wpi.first.wpilibj.AnalogInput
 import edu.wpi.first.wpilibj.SerialPort
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.constants.*
 import frc.robot.lib.BLine.FollowPath
 import frc.robot.lib.BLine.Path
+import org.walledlakerobotics.pinpointrio.Pinpoint
 import kotlin.math.PI
 import kotlin.math.absoluteValue
 
@@ -37,25 +40,30 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
 
     private val odometry = Pinpoint(SerialPort.Port.kUSB)
 
+    private val distanceSensor = AnalogInput(0)
+
     var position
         get() = odometry.position
         set(value) { odometry.position = value }
 
     var heading
-        get() = odometry.heading
-        set(value) { odometry.heading = value }
+        get() = odometry.rotation2d
+        set(value) { odometry.rotation2d = value }
 
     val velocity
         get() = odometry.velocity
+
+    val distanceToWall
+        get() = distanceSensor.value
 
     val builder = FollowPath.Builder(
         this,
         { position },
         { velocity },
         { drive(it) },
-        PIDController(0.5, 0.0, 0.0),
-        PIDController(0.5, 0.0, 0.0),
-        PIDController(0.5, 0.0, 0.0)
+        PIDController(3.0, 0.0, 1.0),
+        PIDController(5.0, 0.0, 0.0),
+        PIDController(7.0, 0.0, 0.0)
     )
 
     private val kinematics = MecanumDriveKinematics(
@@ -141,39 +149,83 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
     }
 
     fun drive(x: () -> Double, y: () -> Double, theta: () -> Double, fieldRelative: Boolean = true): Command {
-        val driftPID = PIDController(5.0, 0.0, 0.0)
-        driftPID.enableContinuousInput(-PI, PI)
+        val holdHeadingController = PIDController(5.0, 0.0, 0.0).apply {
+            enableContinuousInput(-PI, PI)
+        }
 
-        var prevHeading: Rotation2d? = null
+        val holdXController = PIDController(5.0, 0.0, 0.0)
+        val holdYController = PIDController(5.0, 0.0, 0.0)
 
-//        val limiter = ChassisRateLimiter(8.0, 8.0)
+        var heldHeading: Rotation2d? = null
+        var heldTranslation: Translation2d? = null
 
-        val xLimiter = SlewRateLimiter(8.0)
-        val yLimiter = SlewRateLimiter(8.0)
-        val thetaLimiter = SlewRateLimiter(10.0)
+        val xLimiter = SlewRateLimiter(6.0, Double.NEGATIVE_INFINITY, 0.0)
+        val yLimiter = SlewRateLimiter(6.0, Double.NEGATIVE_INFINITY, 0.0)
 
-        return startRun({ driftPID.reset() }) {
+        return startRun({
+            heldHeading = null
+            heldTranslation = null
+
+            val velocity = if (fieldRelative)
+                ChassisSpeeds.fromRobotRelativeSpeeds(velocity, heading) else velocity
+
+            xLimiter.reset(velocity.vxMetersPerSecond)
+            yLimiter.reset(velocity.vyMetersPerSecond)
+        }) {
+            var fieldRelative = fieldRelative
+
             val x = xLimiter.calculate(x() * kTranslationFactor)
             val y = yLimiter.calculate(y() * kTranslationFactor)
-            val theta = thetaLimiter.calculate(theta() * kRotationFactor)
+            val theta = theta() * kRotationFactor
 
             val speeds = ChassisSpeeds(x, y, theta)
 
-//            val limitedSpeeds = limiter.calculate(speeds)
-
-            if (odometry.velocity.omegaRadiansPerSecond.absoluteValue < 0.01 && speeds.omegaRadiansPerSecond.absoluteValue < 0.01) {
-                prevHeading = prevHeading ?: odometry.position.rotation
-
-                speeds.omegaRadiansPerSecond =
-                    driftPID.calculate(odometry.position.rotation.radians, prevHeading!!.radians) +
-                        speeds.vyMetersPerSecond * 0.1
+            if (heldHeading == null) {
+                if (
+                    velocity.omegaRadiansPerSecond.absoluteValue < 0.01 &&
+                    speeds.omegaRadiansPerSecond.absoluteValue < 0.01
+                ) {
+                    holdHeadingController.reset()
+                    heldHeading = position.rotation
+                }
             } else {
-                prevHeading = null
+                if (speeds.omegaRadiansPerSecond.absoluteValue < 0.01) {
+                    speeds.omegaRadiansPerSecond =
+                        holdHeadingController.calculate(
+                            position.rotation.radians, heldHeading!!.radians) +
+                        speeds.vyMetersPerSecond * 0.1
+                } else {
+                    heldHeading = null
+                }
             }
 
+            if (heldTranslation == null) {
+                if (
+                    velocity.vxMetersPerSecond.absoluteValue < 0.01 &&
+                    velocity.vyMetersPerSecond.absoluteValue < 0.01 &&
+                    speeds.vxMetersPerSecond.absoluteValue < 0.01 &&
+                    speeds.vyMetersPerSecond.absoluteValue < 0.01
+                ) {
+                    holdXController.reset()
+                    holdYController.reset()
+                    heldTranslation = position.translation
+                }
+            } else {
+                if (
+                    speeds.vxMetersPerSecond.absoluteValue < 0.01 &&
+                    speeds.vyMetersPerSecond.absoluteValue < 0.01
+                ) {
+                    fieldRelative = true
+
+                    speeds.vxMetersPerSecond = holdXController.calculate(position.x, heldTranslation!!.x)
+                    speeds.vyMetersPerSecond = holdYController.calculate(position.y, heldTranslation!!.y)
+                } else {
+                    heldTranslation = null
+                }
+            }
 
             drive(speeds, fieldRelative)
-        }
+        }.finallyDo { -> stop() }
     }
 
     fun stop() {
@@ -196,6 +248,7 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         backRightNeo.close()
 
         odometry.close()
+        distanceSensor.close()
     }
 
     private val sysIdRoutine = SysIdRoutine(

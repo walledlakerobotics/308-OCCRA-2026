@@ -26,14 +26,14 @@ class Intake : SubsystemBase(), AutoCloseable {
 
     val run: Command
         get() = startEnd({
-            motorIntake(4.0)
+            motorIntake(3.0)
         }, {
             motorIntake(0.0)
         })
 
-    val runSlowly: Command
+    val runFast: Command
         get() = startEnd({
-            motorIntake(2.0)
+            motorIntake(6.0)
         }, {
             motorIntake(0.0)
         })

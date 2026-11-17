@@ -2,14 +2,13 @@ package frc.robot
 
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import frc.robot.commands.Autos
 import frc.robot.commands.alignToHeading
-import frc.robot.commands.alignToPose
-import frc.robot.commands.alignToTarget
+import frc.robot.commands.faceToward
 import frc.robot.commands.intake
 import frc.robot.commands.shoot
 import frc.robot.commands.stage
@@ -27,14 +26,18 @@ class RobotContainer : AutoCloseable {
     val driverController = CommandXboxController(kDriverControllerPort)
     val coDriverController = CommandXboxController(kCoDriverControllerPort)
 
-    val vision = Vision()
-
     val drivetrain = Drivetrain()
     val intake = Intake()
     val indexer = Indexer()
     val shooter = Shooter()
 
+    val vision = Vision { drivetrain.position }
+
+    val autos = Autos(drivetrain, indexer, intake, shooter)
+
     init {
+        SmartDashboard.putData("Autos/Select", autos.chooser)
+
         // config controller binds
         drivetrain.defaultCommand = drivetrain.drive(
             { -MathUtil.applyDeadband(driverController.leftY, kDeadBandThreshold) },
@@ -44,21 +47,14 @@ class RobotContainer : AutoCloseable {
 
         driverController.leftBumper().whileTrue(
             drivetrain.alignToHeading(
-                { Rotation2d.kZero },
                 { -MathUtil.applyDeadband(driverController.leftY, kDeadBandThreshold) },
                 { -MathUtil.applyDeadband(driverController.leftX, kDeadBandThreshold) },
-            )
+            ) { Rotation2d.kZero }
         )
 
-//        driverController.leftBumper().whileTrue(
-//            drivetrain.alignToPose(
-//                { Pose2d.kZero }
-//            )
-//        )
-
         driverController.rightBumper().whileTrue(
-            drivetrain.alignToTarget(
-                { vision.bestTarget },
+            drivetrain.faceToward(
+                { vision.bestTargetPose },
                 { -MathUtil.applyDeadband(driverController.leftY, kDeadBandThreshold) },
                 { -MathUtil.applyDeadband(driverController.leftX, kDeadBandThreshold) },
                 { -MathUtil.applyDeadband(driverController.rightX, kDeadBandThreshold) }
@@ -72,40 +68,24 @@ class RobotContainer : AutoCloseable {
         driverController.povLeft().whileTrue(drivetrain.drive({ 0.0 }, { 0.1 }, { 0.0 }))
 
         coDriverController.leftBumper()
-            .whileTrue(intake(intake, indexer))
+            .whileTrue(intake(intake, indexer, shooter))
             .onFalse(stage(indexer, 0.15))
 
         coDriverController.leftTrigger().whileTrue(indexer.reverse)
-        // coDriverController.a().whileTrue(intake.intake)
 
         coDriverController.rightBumper().whileTrue(shoot(indexer, intake, shooter))
 
-        // coDriverController.leftBumper().whileTrue(shooter.sysIdForwardQuasistatic)
-        // coDriverController.rightBumper().whileTrue(shooter.sysIdReverseQuasistatic)
-
-        // coDriverController.leftTrigger().whileTrue(shooter.sysIdForwardDynamic)
-        // coDriverController.rightTrigger().whileTrue(shooter.sysIdReverseDynamic)
-
-        // driverController.leftBumper().whileTrue(
-        //     drivetrain.drive(
-        //         { 0.1 },
-        //         { 0.0 },
-        //         { 0.0 }
-        //     ))
-
-        // driverController.rightBumper().whileTrue(
-        //     drivetrain.drive(
-        //         { 0.1 },
-        //         { 0.0 },
-        //         { 0.0 }
-        //     ))
+        SmartDashboard.putNumber("Auto/Time", 1.2)
     }
 
 
     val autonomousCommand: Command
         get() {
-            return shoot(indexer, intake, shooter).withTimeout(6.0)
-                .andThen(drivetrain.drive({ 0.5 }, { 0.0 }, { 0.0 }).withTimeout(1.0))
+//            return drivetrain.drive({ -0.5 }, { 0.0 }, { 0.0 })
+//                .withTimeout(SmartDashboard.getNumber("Auto/Time", 1.2))
+//                .andThen(shoot(indexer, intake, shooter).withTimeout(5.0))
+
+            return autos.chooser.selected
         }
 
     override fun close() {
