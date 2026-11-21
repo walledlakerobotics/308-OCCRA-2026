@@ -95,7 +95,7 @@ fun Drivetrain.faceToward(
     target: () -> Translation2d?
 ) = alignToHeading(x, y) {
     val target = target() ?: return@alignToHeading heading
-    val targetOffset = target - position.translation
+    val targetOffset = position.translation - target
 
     targetOffset.angle
 }

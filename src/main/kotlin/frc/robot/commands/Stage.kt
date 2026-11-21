@@ -14,13 +14,13 @@ fun intake(intake: Intake, indexer: Indexer, shooter: Shooter) = Commands.parall
 fun stage(indexer: Indexer, timeout: Double) = indexer.reverse.withTimeout(timeout)!!
 
 fun Indexer.runWhile(condition: () -> Boolean) =
-    run.onlyWhile(condition)
+    runSlowly.onlyWhile(condition)
         .andThen(reverse.withTimeout(0.5))
         .andThen(reverse.until(condition))
         .repeatedly()!!
 
 fun shoot(indexer: Indexer, intake: Intake, shooter: Shooter) = Commands.parallel(
-    indexer.runWhile { indexer.rightSensorTriggered },
+    indexer.runWhile { shooter.atGoal },
     intake.runFast,
     shooter.shoot
 )!!

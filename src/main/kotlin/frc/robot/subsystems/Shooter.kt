@@ -77,7 +77,7 @@ class Shooter : SubsystemBase(), AutoCloseable {
     val atGoal: Boolean
         get() =
             shooterMotor.velocity.valueAsDouble >=
-                    SmartDashboard.getNumber("Shooter/ShootingVelocity", kShootingVelocity) * 0.98
+                    SmartDashboard.getNumber("Shooter/ShootingVelocity", kShootingVelocity) * 0.99
         
 
     override fun close() {

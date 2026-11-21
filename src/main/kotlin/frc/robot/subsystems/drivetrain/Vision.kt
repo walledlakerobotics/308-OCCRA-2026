@@ -56,14 +56,12 @@ class Vision : AutoCloseable {
         }
     }
 
-    fun getClosestBallTo(robotPose: Pose2d, targetPose: Translation2d = robotPose.translation): Translation2d? {
-        val ballPositions = getBallPositions(robotPose)
+    fun getClosestBallTo(robotPose: Pose2d, targetPose: Translation2d? = null): Translation2d? {
+        val targetPose = targetPose ?: robotPose.translation
 
+        val ballPositions = getBallPositions(robotPose)
         return ballPositions.minByOrNull { it.getSquaredDistance(targetPose) }
     }
-
-    fun getClosestBallTo(robotPose: Pose2d, targetPose: Translation2d?) =
-        if (targetPose != null) getClosestBallTo(robotPose, targetPose) else getClosestBallTo(robotPose)
 
     fun update() {
         latestResult = camera.allUnreadResults.lastOrNull() ?:

@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.units.Units.Millimeters
-import org.walledlakerobotics.pinpointrio.EncoderDirection
+import pinpointrio.EncoderDirection
 import kotlin.math.PI
 
 // meters/second
@@ -34,7 +34,7 @@ private val kSparkMaxConfig: SparkBaseConfig
 
         // pid control
         config.closedLoop
-            .pid(0.1, 0.0, 0.0)
+            .pid(0.0, 0.0, 0.0)
             .maxOutput(1.0) // the max duty cycle coming from PID
             .feedForward
             .kV(12.0 / (5676.0 * kRotationsToMeters / 60.0))

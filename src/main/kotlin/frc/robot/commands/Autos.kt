@@ -1,6 +1,5 @@
 package frc.robot.commands
 
-import edu.wpi.first.wpilibj2.command.Commands
 import frc.robot.lib.BLine.Path
 import frc.robot.subsystems.Indexer
 import frc.robot.subsystems.Intake
@@ -19,7 +18,7 @@ class Autos(
     @Auto("Test")
     @Default
     val test
-        get() = drivetrain.followPath(Path("Grab Ball"), true)
+        get() = drivetrain.followPath(Path("Grab Ball 1"), true)
 
     @Auto("Shoot 1")
     val shoot1
@@ -29,7 +28,7 @@ class Autos(
     @Auto("Shoot 2")
     val shoot2
         get() = shoot1
-            .andThen(drivetrain.followPath(Path("Grab Ball"))
+            .andThen(drivetrain.followPath(Path("Grab Ball 1"))
                 .deadlineFor(intake(intake, indexer, shooter)))
             .andThen(drivetrain.followPath(Path("Shoot 2")))
             .andThen(shoot(indexer, intake, shooter).withTimeout(3.0))

@@ -10,6 +10,7 @@ import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.epilogue.Logged
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.filter.SlewRateLimiter
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.constants.*
 import frc.robot.lib.BLine.FollowPath
 import frc.robot.lib.BLine.Path
-import org.walledlakerobotics.pinpointrio.Pinpoint
+import pinpointrio.Pinpoint
 import kotlin.math.PI
 import kotlin.math.absoluteValue
 
@@ -42,13 +43,21 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
 
     private val distanceSensor = AnalogInput(0)
 
+    private var odometryOutOfDate = false
+
     var position
         get() = odometry.position
-        set(value) { odometry.position = value }
+        set(value) {
+            odometryOutOfDate = true
+            odometry.position = value
+        }
 
     var heading
         get() = odometry.rotation2d
-        set(value) { odometry.rotation2d = value }
+        set(value) {
+            odometryOutOfDate = true
+            odometry.rotation2d = value
+        }
 
     val velocity
         get() = odometry.velocity
@@ -107,6 +116,8 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
         RobotModeTriggers.disabled()
             .onTrue(Commands.runOnce({ setIdleMode(SparkBaseConfig.IdleMode.kCoast) }))
             .onFalse(Commands.runOnce({ setIdleMode(SparkBaseConfig.IdleMode.kBrake) }))
+
+        SmartDashboard.putData("Odometry/Reset", runOnce { position = Pose2d.kZero }.ignoringDisable(true))
     }
 
     fun followPath(path: Path, resetOdometry: Boolean = false): Command {
@@ -179,6 +190,13 @@ class Drivetrain : SubsystemBase(), AutoCloseable {
             val theta = theta() * kRotationFactor
 
             val speeds = ChassisSpeeds(x, y, theta)
+
+            if (odometryOutOfDate) {
+                heldHeading = null
+                heldTranslation = null
+
+                odometryOutOfDate = false
+            }
 
             if (heldHeading == null) {
                 if (

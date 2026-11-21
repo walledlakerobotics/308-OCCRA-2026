@@ -1,4 +1,4 @@
-package org.walledlakerobotics.pinpointrio
+package pinpointrio
 
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -245,6 +245,8 @@ class Pinpoint(val port: SerialPort.Port) : AutoCloseable {
     fun resetPosition(position: Pose2d) {
         val data = ResetData.resetPosition(position)
         writeFrame(data.toBuffer())
+
+        Thread.sleep(500)
     }
 
     fun setEncoderOffsets(offsetX: Distance, offsetY: Distance) {
